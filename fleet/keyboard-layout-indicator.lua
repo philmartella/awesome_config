@@ -1,6 +1,7 @@
 local pairs = pairs
 local awful = require("awful")
 local wibox = require("wibox")
+local naughty = require("naughty")
 
 -- Keyboard Layout Switcher
 -- Keyboard map indicator and changer
@@ -11,41 +12,54 @@ local indicator = { mt = {}, wmt = {} }
 indicator.wmt.__index = indicator
 
 function indicator:toggleKey ( key )
-	awful.util.spawn("xdotool key " .. key)
-
-	self:updateKey()
+	awful.spawn.easy_async("xdotool key "..key, function (out, err, reason, code)
+		if 'exit' == reason and 0 == code then
+			self:updateKey(false, key)
+		end
+	end)
 end
 
-function indicator:updateKey ()
-	for _, k in pairs(self.keys) do
-		local color = 'white'
+function indicator:updateKey ( startup, key )
+	awful.spawn.easy_async("xset -q", function (out, err, reason, code)
+		for _, kk in pairs(self.keys) do
+			if kk.led then
+				local color = '#FF0000'
+				local led_status = string.match(out, kk.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
 
-		if k.led then
-			local leds_cmd = io.popen("xset -q")
-			local leds_output = leds_cmd:read("*a")
-			local led_status = string.match(leds_output, k.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
+				if led_status then
+					if 'on' == led_status then
+						color = '#77FF77'
+					elseif 'off' == led_status then
+						color = '#777777'
+					end
 
-			if 'on' == led_status then
-				color = '#77ff77'
-			elseif 'off' == led_status then
-				color = 'gray'
+					if not startup and key and kk.key == key then
+						naughty.notify({ preset = naughty.config.presets.normal,
+						timeout = 3,
+						position = "bottom_right",
+						title = kk.led,
+						text = tostring(led_status) })
+					end
+				end
+
+				self.keywidgets[_]:set_markup('<span color="'..color..'">'..kk.name..'</span>')
 			else
-				color = 'white'
+				self.keywidgets[_]:set_markup('<span>'..kk.name..'</span>')
 			end
 		end
-
-		self.keywidgets[_]:set_markup('<span color="'..color..'">'..k.name..'</span>')
-	end
+	end)
 end
 
 function indicator:statKeyWidget ()
 	for _, k in pairs(self.keys) do
+		-- kk = awful.key({}, k.key)
+		-- kk.connect_signal("release", function () self:updateKey() end)
+
 		self.keywidgets[_] = wibox.widget.textbox(k.name)
 
 		self.keywidgets[_]:buttons(awful.util.table.join(
 			awful.button({ }, 1, function() self:toggleKey(k.key) end),
-			awful.button({ }, 2, function() self:toggleKey(k.key) end),
-			awful.button({ }, 3, function() self:toggleKey(k.key) end)
+			awful.button({ }, 2, function() self:toggleKey(k.key) end)
 		))
 
 		if self.dividers.keys then
@@ -55,7 +69,7 @@ function indicator:statKeyWidget ()
 		self.widget:add(self.keywidgets[_])
 	end
 
-	self:updateKey()
+	self:updateKey(true)
 end
 
 function indicator.new ( args )

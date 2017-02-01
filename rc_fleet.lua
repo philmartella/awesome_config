@@ -313,8 +313,8 @@ kbdcfg = keyboardlayoutindicator({
 		{ name = "qwerty ", layout = "us", variant = nil }
 	},
 	keys = {
-		{ name = "1", key = "Num_Lock", led = "Num Lock" },
-		{ name = "A", key = "Caps_Lock", led = "Caps Lock" }
+		{ name = "[1]", key = "Num_Lock", led = "Num Lock" },
+		{ name = "[A]", key = "Caps_Lock", led = "Caps Lock" }
 	},
 	dividers = {
 		section = bar,
