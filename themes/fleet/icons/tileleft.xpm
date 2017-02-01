@@ -1,0 +1,27 @@
+/* XPM */
+static char *tileleft[] = {
+/* columns rows colors chars-per-pixel */
+"18 18 3 1 ",
+"  c #0099CC",
+". c white",
+"X c None",
+/* pixels */
+"XXXXXXXXXXXXXXXXXX",
+"X                X",
+"X XX XX XXXXXXXX X",
+"X XX XX XXX....X X",
+"X XX XX XXXXX..X X",
+"X XX XX XXXX.X.X X",
+"X       XXX.XX.X X",
+"X XX XX XX.XXXXX X",
+"X XX XX XXXXXXXX X",
+"X XX XX XXXXXXXX X",
+"X XX XX XX.XXXXX X",
+"X       XXX.XX.X X",
+"X XX XX XXXX.X.X X",
+"X XX XX XXXXX..X X",
+"X XX XX XXX....X X",
+"X XX XX XXXXXXXX X",
+"X                X",
+"XXXXXXXXXXXXXXXXXX"
+};

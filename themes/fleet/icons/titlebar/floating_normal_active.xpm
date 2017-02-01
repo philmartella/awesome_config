@@ -1,0 +1,27 @@
+/* XPM */
+static char *floating_normal_active[] = {
+/* columns rows colors chars-per-pixel */
+"18 18 3 1 ",
+"  c #0099CC",
+". c #A7A194",
+"X c None",
+/* pixels */
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXX....XXXX....XXX",
+"XXX....XXXX....XXX",
+"XXX....XXXX....XXX",
+"XXX....XXXX....XXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXX....XXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
+"                  ",
+"                  ",
+"XXXXXXXXXXXXXXXXXX"
+};

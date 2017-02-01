@@ -1,0 +1,25 @@
+/* XPM */
+static char *spr_small_empty[] = {
+/* columns rows colors chars-per-pixel */
+"5 18 1 1 ",
+"  c None",
+/* pixels */
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     ",
+"     "
+};

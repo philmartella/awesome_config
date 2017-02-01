@@ -1,0 +1,27 @@
+/* XPM */
+static char *fairh[] = {
+/* columns rows colors chars-per-pixel */
+"18 18 3 1 ",
+"  c #0099CC",
+". c white",
+"X c None",
+/* pixels */
+"XXXXXXXXXXXXXXXXXX",
+"X                X",
+"X XXXX XXXX XXXX X",
+"X XXXX XXXX XXXX X",
+"X XXXX XXXX XXXX X",
+"X XXXX XXXX XXXX X",
+"X                X",
+"X XXXX XXXX XXXX X",
+"X XXXX XXXX XXXX X",
+"X XXXX XXXX XXXX X",
+"X XXXX XXXX XXXX X",
+"X                X",
+"X ....... XXXXXX X",
+"X .XXXXX. XXXXXX X",
+"X .XXXXX. XXXXXX X",
+"X ....... XXXXXX X",
+"X                X",
+"XXXXXXXXXXXXXXXXXX"
+};

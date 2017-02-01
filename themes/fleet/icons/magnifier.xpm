@@ -1,0 +1,27 @@
+/* XPM */
+static char *magnifier[] = {
+/* columns rows colors chars-per-pixel */
+"18 18 3 1 ",
+"  c #0099CC",
+". c white",
+"X c None",
+/* pixels */
+"XXXXXXXXXXXXXXXXXX",
+"X                X",
+"X XXXXXXXXXXXXXX X",
+"X XXXXXXXXXXXXXX X",
+"X XXXXXXXXXXXXXX X",
+"X XX..........XX X",
+"X XX.XXXXXXXX.XX X",
+"X XX.XXXXXXXX.XX X",
+"X XX.XXXXXXXX.XX X",
+"X XX.XXXXXXXX.XX X",
+"X XX.XXXXXXXX.XX X",
+"X XX.XXXXXXXX.XX X",
+"X XX..........XX X",
+"X XXXXXXXXXXXXXX X",
+"X XXXXXXXXXXXXXX X",
+"X XXXXXXXXXXXXXX X",
+"X                X",
+"XXXXXXXXXXXXXXXXXX"
+};

@@ -1,0 +1,27 @@
+/* XPM */
+static char *maximized_focus_active[] = {
+/* columns rows colors chars-per-pixel */
+"18 18 3 1 ",
+"  c #0099CC",
+". c #8AE181",
+"X c None",
+/* pixels */
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
+"XXX....XXXX....XXX",
+"XXX....XXXX....XXX",
+"XXX....XXXX....XXX",
+"XXX....XXXX....XXX",
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXX....XXX",
+"XXXXXXXXXXX....XXX",
+"XXXXXXXXXXX....XXX",
+"XXXXXXXXXXX....XXX",
+"XXXXXXXXXXXXXXXXXX",
+"                  ",
+"                  ",
+"XXXXXXXXXXXXXXXXXX"
+};
