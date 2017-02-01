@@ -21,10 +21,10 @@ end
 
 function indicator:updateKey ( startup, key )
 	awful.spawn.easy_async("xset -q", function (out, err, reason, code)
-		for _, kk in pairs(self.keys) do
-			if kk.led then
+		for _, k in pairs(self.keys) do
+			if k.led then
 				local color = '#FF0000'
-				local led_status = string.match(out, kk.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
+				local led_status = string.match(out, k.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
 
 				if led_status then
 					if 'on' == led_status then
@@ -33,18 +33,18 @@ function indicator:updateKey ( startup, key )
 						color = '#777777'
 					end
 
-					if not startup and key and kk.key == key then
+					if not startup and key and k.key == key then
 						naughty.notify({ preset = naughty.config.presets.normal,
 						timeout = 3,
 						position = "bottom_right",
-						title = kk.led,
+						title = k.led,
 						text = tostring(led_status) })
 					end
 				end
 
-				self.keywidgets[_]:set_markup('<span color="'..color..'">'..kk.name..'</span>')
+				self.keywidgets[_]:set_markup('<span color="'..color..'">'..k.name..'</span>')
 			else
-				self.keywidgets[_]:set_markup('<span>'..kk.name..'</span>')
+				self.keywidgets[_]:set_markup('<span>'..k.name..'</span>')
 			end
 		end
 	end)
@@ -52,8 +52,7 @@ end
 
 function indicator:statKeyWidget ()
 	for _, k in pairs(self.keys) do
-		-- kk = awful.key({}, k.key)
-		-- kk.connect_signal("release", function () self:updateKey() end)
+		awful.key({}, k.key, function () end, function () self:updateKey(false, k.key) end)
 
 		self.keywidgets[_] = wibox.widget.textbox(k.name)
 
