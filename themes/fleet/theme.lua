@@ -1,5 +1,5 @@
 --[[
-     Fleet Awesome WM config 2.1
+     Fleet Theme for Awesome WM 4.0
 --]]
 
 theme                               = {}
@@ -32,8 +32,14 @@ theme.widget_bg                     = theme.icon_dir .. "/bg_focus_noline.xpm"
 
 -- {{{ Menu
 theme.menu_height                   = "32"
-theme.menu_width                    = "250"
+theme.menu_width                    = "200"
 theme.submenu_icon                  = theme.icon_dir .. "/submenu.xpm"
+theme.menu_fg_focus                 = "#111111"
+theme.menu_bg_focus                 = "#0099CC"
+theme.menu_fg_normal                = "#EFEFEF"
+theme.menu_bg_normal                = "#333333"
+theme.menu_border_color             = "#FFFFFF"
+theme.menu_border_width             = "2"
 -- }}}
 
 -- {{{ Spacers
@@ -50,6 +56,7 @@ theme.last                          = theme.icon_dir .. "/last.xpm"
 -- {{{ Widget Icons
 theme.awesome_icon                  = theme.icon_dir .. "/awesome_icon.xpm"
 theme.application_icon              = theme.icon_dir .. "/application_icon.xpm"
+theme.power_icon                    = theme.icon_dir .. "/power.xpm"
 theme.keyboard											= theme.icon_dir .. "/keyboard.xpm"
 theme.vol_bg                        = theme.icon_dir .. "/vol_bg.xpm"
 theme.bar                           = theme.icon_dir .. "/bar.xpm"

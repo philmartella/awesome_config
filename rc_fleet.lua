@@ -234,25 +234,38 @@ myawesomemenu = {
 	{ "edit config", editor_cmd .. " " .. awesome.conffile }
 }
 
-mysessionmenu = {
-	{ "lock", "xlock -mode space" },
-	{ "restart", awesome.restart },
-	{ "quit", function() awesome.quit() end},
+mysysmenu = {
 	{ "reboot", "systemctl reboot"},
 	{ "poweroff", "systemctl poweroff"}
 }
 
 mymainmenu = awful.menu({
 	items = {
-		{ "session", mysessionmenu, beautiful.awesome_icon },
-		{ "awesome", myawesomemenu, beautiful.awesome_icon },
-		{ "open terminal", terminal }
+		{ "open terminal", terminal },
+		{ "open editor", editor_cmd },
+		{ "open files", "nautilus" },
+		{ "open browser", "chromium" },
+		{ "awesome", myawesomemenu, beautiful.application_icon },
+	}
+})
+
+mysessionmenu = awful.menu({
+	items = {
+		{ "lock", "xlock -mode space" },
+		{ "restart", function() awesome.restart() end },
+		{ "quit", function() awesome.quit() end},
+		{ "system", mysysmenu, beautiful.application_icon },
 	}
 })
 
 mylauncher = awful.widget.launcher({
 	image = beautiful.awesome_icon,
 	menu = mymainmenu
+})
+
+mysesslauncher = awful.widget.launcher({
+	image = beautiful.power_icon,
+	menu = mysessionmenu
 })
 
 -- Menubar configuration
@@ -293,6 +306,32 @@ bar_empty = wibox.widget.imagebox()
 bar_empty:set_image(beautiful.bar_empty)
 
 -- Keyboard map indicator and switcher
+kbdcfg = keyboardlayoutindicator({
+	layouts = {
+		{ name = "colemak ", layout = "us", variant = "colemak", color = "#80CCE6" },
+		{ name = "dvorak ", layout = "us", variant = "dvorak", color = "#FF9F9F" },
+		{ name = "qwerty ", layout = "us", variant = nil }
+	},
+	keys = {
+		{ name = "1", key = "Num_Lock", led = "Num Lock" },
+		{ name = "A", key = "Caps_Lock", led = "Caps Lock" }
+	},
+	dividers = {
+		section = bar,
+		keys = spr_small
+	}
+})
+kbdwidget = wibox.widget.background()
+kbdicon = wibox.widget.imagebox()
+kbdicon:set_image(beautiful.keyboard)
+kbdwidget:set_widget(kbdcfg.widget)
+kbdwidget:set_bgimage(beautiful.widget_bg)
+--mykeyboardlayout = wibox()
+--mykeyboardlayout:setup {
+--	layout = wibox.layout.align.horizontal,
+--	kbdicon,
+--	kbdwidgetb,
+--}
 mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- Clock
@@ -418,7 +457,12 @@ awful.screen.connect_for_each_screen(function(s)
 			layout = wibox.layout.align.horizontal,
 			{ -- Left widgets
 				layout = wibox.layout.fixed.horizontal,
+				spr_left,
 				mylauncher,
+				spr_right,
+				spr_left,
+				mysesslauncher,
+				spr_right,
 				wibox.widget.systray(),
 			},
 			{ -- Middle widgets
@@ -427,8 +471,10 @@ awful.screen.connect_for_each_screen(function(s)
 			{ -- Right widgets
 				layout = wibox.layout.fixed.horizontal,
 				spr_left,
+				kbdicon,
+				bar,
 				spr_small,
-				mykeyboardlayout,
+				kbdwidget,
 				spr_small,
 				spr_right,
 
@@ -483,7 +529,7 @@ awful.key({ modkey }, "F2", function ()
 		-- write_conf(inifile, 'tag', currScreen, currTag, tagName)
 		awful.tag.selected().name = tagName
 	else
-		tagName = '[' .. currTag .. ']' .. dpromptOut .. ''
+		tagName = '[' .. currTag .. '] ' .. dpromptOut .. ''
 		-- write_conf(inifile, 'tag', currScreen, currTag, tagName)
 		awful.tag.selected().name = tagName
 	end

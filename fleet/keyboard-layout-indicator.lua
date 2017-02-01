@@ -12,6 +12,8 @@ indicator.wmt.__index = indicator
 
 function indicator:toggleKey ( key )
 	awful.util.spawn("xdotool key " .. key)
+
+	self:updateKey()
 end
 
 function indicator:updateKey ()
@@ -21,9 +23,14 @@ function indicator:updateKey ()
 		if k.led then
 			local leds_cmd = io.popen("xset -q")
 			local leds_output = leds_cmd:read("*a")
-			local led_status = string.match(leds_output, k.led..":([^ ]*)")
+			local led_status = string.match(leds_output, k.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
+
 			if 'on' == led_status then
-				color = 'green'
+				color = '#77ff77'
+			elseif 'off' == led_status then
+				color = 'gray'
+			else
+				color = 'white'
 			end
 		end
 
@@ -47,6 +54,8 @@ function indicator:statKeyWidget ()
 
 		self.widget:add(self.keywidgets[_])
 	end
+
+	self:updateKey()
 end
 
 function indicator.new ( args )
@@ -112,7 +121,7 @@ end
 
 function indicator:update()
 	-- update layoutwidget text
-	local text = " " .. self.current.name .. " "
+	local text = "" .. self.current.name .. ""
 	if self.current.color and self.current.color ~= nil then
 		local w_markup = '<span color="' .. self.current.color .. '">' .. text ..'</span>'
 		self.layoutwidget:set_markup(w_markup)
