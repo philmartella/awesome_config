@@ -25,25 +25,29 @@ function indicator:updateKey ( startup, key )
 	awful.spawn.easy_async("xset -q", function (out, err, reason, code)
 		for _, k in pairs(self.keys) do
 			if k.led then
-				local color = '#FF0000'
+				local color = '#FF0000FF'
 				local led_status = string.match(out, k.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
 
 				if led_status then
 					if 'on' == led_status then
-						color = '#77FF77'
+						color = '#77FF77FF'
 					elseif 'off' == led_status then
-						color = '#777777'
+						color = '#777777FF'
 					end
 
 					if not startup and key and k.key == key then
-						notification = naughty.notify({ preset = naughty.config.presets.low,
-							position = "bottom_right",
-							title = k.led,
+						notification_id = naughty.notify({
 							text = tostring(led_status),
+							title = tostring(k.led),
+							position = "bottom_right",
+							ontop = true,
+							fg = color,
+							bg = "#000000FF",
+							border_width = 2,
+							border_color = color,
+							preset = naughty.config.presets.low,
 							replaces_id = notification_id,
-						})
-
-						notification_id = notification.id
+						}).id
 					end
 				end
 

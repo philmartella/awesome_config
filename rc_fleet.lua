@@ -13,12 +13,6 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- Fleet widget libraries
 local fleet = require("fleet")
 
--- {{{ External library config
-awful.titlebar.enable_tooltip = false
-naughty.config.defaults.timeout = 0
-naughty.config.presets.low.timeout = 3
--- }}}
-
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -83,12 +77,18 @@ awful.layout.layouts = {
 }
 -- }}}
 
+-- {{{ External library config
+awful.titlebar.enable_tooltip = false
+naughty.config.defaults.timeout = 0
+naughty.config.presets.low.timeout = 4
+-- }}}
+
 -- {{{ Helper functions
 _awesome_quit = awesome.quit
 _awesome_restart = awesome.restart
 
 awesome.quit = function()
-	if os.getenv("DESKTOP_SESSION") == "awesome-gnome" then
+	if os.getenv("XDG_CURRENT_DESKTOP") == "GNOME" then
 		os.execute("/usr/bin/gnome-session-quit --logout --no-prompt")
 	else
 		_awesome_quit()
@@ -223,8 +223,8 @@ function get_clientbuttons ( c, s )
 	end
 
 	if s then
-		local clienticon_margin = wibox.layout.margin(myclienticon, 0, 0, 3, 3)
-		local clienttitle_margin = wibox.layout.margin(myclientname, 0, 0, 4, 4)
+		local clienticon_margin = wibox.layout.margin(myclienticon, 0, 0, 0, 0)
+		local clienttitle_margin = wibox.layout.margin(myclientname, 0, 0, 2, 2)
 
 		clientname_layout:set_strategy("max")
 		clientname_layout:set_width(256)
@@ -267,6 +267,14 @@ mysysmenu = {
 	{ "poweroff", "systemctl poweroff"}
 }
 
+mywmmenu = {
+	{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end },
+	{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
+	{ "toggle bottom wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mybotwibox}) end },
+	{ "change wallpaper", function () end },
+	{ "lock screen", lockscreen_cmd },
+}
+
 mymainmenu = awful.menu({
 	items = {
 		{ "open terminal", terminal },
@@ -274,7 +282,8 @@ mymainmenu = awful.menu({
 		{ "open files", filemanager },
 		{ "open browser", browser },
 		{ "send email", email },
-		{ "awesome", myawesomemenu, beautiful.application_icon },
+		{ "window", mywmmenu },
+		{ "awesome", myawesomemenu, beautiful.awesome_icon },
 	}
 })
 
@@ -288,13 +297,7 @@ mysessionmenu = awful.menu({
 })
 
 myrootmenu = awful.menu({
-	items = {
-		{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end },
-		{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
-		{ "toggle bottom wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mybotwibox}) end },
-		{ "change wallpaper", function () end },
-		{ "lock screen", lockscreen_cmd },
-	}
+	items = mywmmenu
 })
 
 mylauncher = awful.widget.launcher({
@@ -309,7 +312,7 @@ mysesslauncher = awful.widget.launcher({
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
---menubar.geometry = { x = 0, y = 0 }
+menubar.geometry = { y = 0, height = 22 }
 -- }}}
 
 -- {{{ Wibar Widgets
@@ -464,10 +467,6 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Create a tasklist widget
 	s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
 
-	-- Create a clientbutton widget
-	s.myclientbox = wibox.widget.background()
-	s.myclientbox:set_widget(get_clientbuttons(nil, s))
-
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, screen = s })
 
@@ -483,8 +482,7 @@ awful.screen.connect_for_each_screen(function(s)
 		s.mytasklist, -- Middle widget
 		{ -- Right widgets
 			layout = wibox.layout.fixed.horizontal,
-			s.myclientbox,
-			spr_small_empty
+			wibox.container.margin(get_clientbuttons(nil, s), 4, 4, 2, 2),
 		},
 	}
 
@@ -540,9 +538,7 @@ end)
 
 -- {{{ Root mouse bindings
 root.buttons(awful.util.table.join(
-	awful.button({ }, 3, function () myrootmenu:toggle() end),
-	awful.button({ }, 4, awful.tag.viewnext),
-	awful.button({ }, 5, awful.tag.viewprev)
+	awful.button({ }, 3, function () myrootmenu:toggle() end)
 ))
 -- }}}
 
@@ -883,7 +879,8 @@ awful.rules.rules = {
 			"Nautilus",
 			"Kruler",
 			"MessageWin",
-			"Gtk-recordMyDesktop"
+			"Gtk-recordMyDesktop",
+			"Wallp"
 		},
 		name = {
 			"Event Tester",

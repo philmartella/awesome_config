@@ -19,9 +19,9 @@ theme.bg_urgent                     = "#2A1F1EFF"
 
 -- {{{ Borders
 theme.border_width                  = "1"
-theme.border                        = "#0099CC"
-theme.border_normal                 = "#ff7700"
-theme.border_focus                  = "#0099CC"
+theme.border                        = "#0099CCFF"
+theme.border_normal                 = "#ff7700FF"
+theme.border_focus                  = "#0099CCFF"
 -- }}}
 
 -- {{{ Widgets
@@ -35,11 +35,11 @@ theme.widget_bg                     = theme.icon_dir .. "/bg_focus_noline.xpm"
 theme.menu_height                   = "32"
 theme.menu_width                    = "200"
 theme.submenu_icon                  = theme.icon_dir .. "/submenu.xpm"
-theme.menu_fg_focus                 = "#111111"
-theme.menu_bg_focus                 = "#0099CC"
-theme.menu_fg_normal                = "#EFEFEF"
-theme.menu_bg_normal                = "#333333"
-theme.menu_border_color             = "#FFFFFF"
+theme.menu_fg_focus                 = "#111111FF"
+theme.menu_bg_focus                 = "#0099CCFF"
+theme.menu_fg_normal                = "#EFEFEFFF"
+theme.menu_bg_normal                = "#333333FF"
+theme.menu_border_color             = "#FFFFFFFF"
 theme.menu_border_width             = "2"
 -- }}}
 
