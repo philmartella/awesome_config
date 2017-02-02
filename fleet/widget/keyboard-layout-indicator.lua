@@ -11,6 +11,8 @@ local naughty = require("naughty")
 local indicator = { mt = {}, wmt = {} }
 indicator.wmt.__index = indicator
 
+local notification_id = 0
+
 function indicator:toggleKey ( key )
 	awful.spawn.easy_async("xdotool key "..key, function (out, err, reason, code)
 		if 'exit' == reason and 0 == code then
@@ -34,11 +36,14 @@ function indicator:updateKey ( startup, key )
 					end
 
 					if not startup and key and k.key == key then
-						naughty.notify({ preset = naughty.config.presets.normal,
-						timeout = 3,
-						position = "bottom_right",
-						title = k.led,
-						text = tostring(led_status) })
+						notification = naughty.notify({ preset = naughty.config.presets.low,
+							position = "bottom_right",
+							title = k.led,
+							text = tostring(led_status),
+							replaces_id = notification_id,
+						})
+
+						notification_id = notification.id
 					end
 				end
 

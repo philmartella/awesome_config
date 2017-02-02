@@ -11,12 +11,12 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- Fleet widget libraries
-local keyboardlayoutindicator = require("fleet/keyboard-layout-indicator")
-local clientcountbox = require("fleet/client-count")
+local fleet = require("fleet")
 
 -- {{{ External library config
 awful.titlebar.enable_tooltip = false
 naughty.config.defaults.timeout = 0
+naughty.config.presets.low.timeout = 3
 -- }}}
 
 -- {{{ Error handling
@@ -49,16 +49,18 @@ end
 -- beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/fleet/theme.lua")
 
--- This is used later as the default terminal and editor to run.
 terminal = "urxvt" or "terminology" or "gnome-terminal" or "xterm"
 editor = os.getenv("EDITOR") or "vim" or "vi" or "nano"
+
 editor_cmd = terminal .. " -e " .. editor
+lockscreen_cmd = "xlock -mode space"
+
+filemanager = "nautilus" or "pcmanfm"
+browser = "chromium" or "firefox" or "opera" or "surf" or "dwb" or "netsurf"
+email = "xdg-email"
 
 -- Default modkey.
 modkey = "Mod4"
-
--- Stateful tab name storage.
-inifile = '/home/pmartella/.config/awesome/aw.ini'
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
@@ -82,6 +84,32 @@ awful.layout.layouts = {
 -- }}}
 
 -- {{{ Helper functions
+_awesome_quit = awesome.quit
+_awesome_restart = awesome.restart
+
+awesome.quit = function()
+	if os.getenv("DESKTOP_SESSION") == "awesome-gnome" then
+		os.execute("/usr/bin/gnome-session-quit --logout --no-prompt")
+	else
+		_awesome_quit()
+	end
+end
+
+awesome.restart = function()
+	_awesome_restart()
+end
+
+function run_once ( cmd )
+	findme = cmd
+	firstspace = cmd:find(" ")
+
+	if firstspace then
+		findme = cmd:sub(0, firstspace - 1)
+	end
+
+	awful.util.spawn_with_shell("pgrep -u $USER -x " .. findme .. " > /dev/null || (" .. cmd .. ")")
+end
+
 local function client_menu_toggle_fn()
 	local instance = nil
 
@@ -243,18 +271,29 @@ mymainmenu = awful.menu({
 	items = {
 		{ "open terminal", terminal },
 		{ "open editor", editor_cmd },
-		{ "open files", "nautilus" },
-		{ "open browser", "chromium" },
+		{ "open files", filemanager },
+		{ "open browser", browser },
+		{ "send email", email },
 		{ "awesome", myawesomemenu, beautiful.application_icon },
 	}
 })
 
 mysessionmenu = awful.menu({
 	items = {
-		{ "lock", "xlock -mode space" },
+		{ "lock", lockscreen_cmd },
 		{ "restart", function() awesome.restart() end },
 		{ "quit", function() awesome.quit() end},
 		{ "system", mysysmenu, beautiful.application_icon },
+	}
+})
+
+myrootmenu = awful.menu({
+	items = {
+		{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end },
+		{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
+		{ "toggle bottom wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mybotwibox}) end },
+		{ "change wallpaper", function () end },
+		{ "lock screen", lockscreen_cmd },
 	}
 })
 
@@ -306,7 +345,7 @@ bar_empty = wibox.widget.imagebox()
 bar_empty:set_image(beautiful.bar_empty)
 
 -- Keyboard map indicator and switcher
-kbdcfg = keyboardlayoutindicator({
+kbdcfg = fleet.widget.keyboardlayoutindicator({
 	layouts = {
 		{ name = "colemak ", layout = "us", variant = "colemak", color = "#80CCE6" },
 		{ name = "dvorak ", layout = "us", variant = "dvorak", color = "#FF9F9F" },
@@ -499,257 +538,182 @@ awful.screen.connect_for_each_screen(function(s)
 end)
 -- }}}
 
--- {{{ Mouse bindings
+-- {{{ Root mouse bindings
 root.buttons(awful.util.table.join(
-	awful.button({ }, 3, function () mymainmenu:toggle() end),
+	awful.button({ }, 3, function () myrootmenu:toggle() end),
 	awful.button({ }, 4, awful.tag.viewnext),
 	awful.button({ }, 5, awful.tag.viewprev)
 ))
 -- }}}
 
--- {{{ Key bindings
-globalkeys = awful.util.table.join(
-
-awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
-{description="show help", group="awesome"}),
-
-awful.key({ modkey }, "F2", function ()
-	currScreen = awful.screen.focused().index or 1
-	currTag = awful.tag.getidx(awful.tag.selected())
-	currText = awful.tag.selected().name:gsub("^%s*(.-)%s*$", "%1")
-	currText = currText:gsub('%[' .. currTag .. '%]', '')
-	currText = currText:gsub("^%s*(.-)%s*$", "%1")
-
-	local dprompt = io.popen("echo "..currText.." | dmenu -m "..(currScreen - 1).." -fn 'Source Code Pro-14' -nb '#333333' -nf '#cccccc' -sb '#285577' -sf '#ffffff' -p 'Tag Name'", "r")
-	local dpromptOut = dprompt:read("*a"):gsub("^%s*(.-)%s*$", "%1")
-	dprompt:close()
-
-	if string.len(dpromptOut) == 0 then
-		tagName = ''.. currTag ..''
-		-- write_conf(inifile, 'tag', currScreen, currTag, tagName)
-		awful.tag.selected().name = tagName
-	else
-		tagName = '[' .. currTag .. '] ' .. dpromptOut .. ''
-		-- write_conf(inifile, 'tag', currScreen, currTag, tagName)
-		awful.tag.selected().name = tagName
-	end
-end, {description = "Rename current tag", group = "tag"}),
-
--- Screen browsing
-awful.key({ modkey }, "h", function () awful.screen.focus_bydirection("left") end),
-awful.key({ modkey }, "n", function () awful.screen.focus_bydirection("down") end),
-awful.key({ modkey }, "e", function () awful.screen.focus_bydirection("up") end),
-awful.key({ modkey }, "i", function () awful.screen.focus_bydirection("right") end),
-
--- Tag browsing
-awful.key({ modkey }, "Left",   awful.tag.viewprev,
-{description = "view previous", group = "tag"}),
-
-awful.key({ modkey }, "Right",  awful.tag.viewnext,
-{description = "view next", group = "tag"}),
-
-awful.key({ modkey }, "Escape", awful.tag.history.restore,
-{description = "go back", group = "tag"}),
-
-awful.key({ modkey, "Shift" }, ",", awful.tag.viewprev,
-{description = "view previous", group = "tag"}),
-
-awful.key({ modkey, "Shift" }, ".", awful.tag.viewnext,
-{description = "view next", group = "tag"}),
-
-awful.key({ modkey }, ",", function ()
-	local scr = awful.screen.focused()
-	for i = 1, #scr.tags do
-		awful.tag.viewidx(-1)
-		if #awful.client.visible(scr) > 0 then
-			 return
-		end
-	end
-end,
-{description = "view previous with clients", group = "tag"}),
-
-awful.key({ modkey }, ".", function ()
-	local scr = awful.screen.focused()
-	for i = 1, #scr.tags do
-		awful.tag.viewidx(1)
-		if #awful.client.visible(scr) > 0 then
-			 return
-		end
-	end
-end,
-{description = "view next with clients", group = "tag"}),
-
-awful.key({ modkey }, "equal", function ()
-	awful.tag.incgap(1)
-end,
-{description = "increase useless gap", group = "tag"}),
-
-awful.key({ modkey }, "minus", function ()
-	awful.tag.incgap(-1)
-end,
-{description = "decrease useless gap", group = "tag"}),
-
--- Client browsing
-awful.key({ modkey,           }, "j",
-function ()
-	awful.client.focus.byidx( 1)
-end,
-{description = "focus next by index", group = "client"}
-),
-awful.key({ modkey,           }, "k",
-function ()
-	awful.client.focus.byidx(-1)
-end,
-{description = "focus previous by index", group = "client"}
-),
-awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
-{description = "show main menu", group = "awesome"}),
-
-
--- Layout manipulation
-awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end,
-{description = "swap with next client by index", group = "client"}),
-awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end,
-{description = "swap with previous client by index", group = "client"}),
-awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end,
-{description = "focus the next screen", group = "screen"}),
-awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end,
-{description = "focus the previous screen", group = "screen"}),
-awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
-{description = "jump to urgent client", group = "client"}),
-
-awful.key({ modkey }, "Tab",
-function ()
-	--awful.client.focus.history.previous()
-	awful.client.focus.byidx(-1)
-	if client.focus then
-		client.focus:raise()
-	end
-end,
-{description = "focus previous", group = "client"}),
-
-awful.key({ modkey, "Shift" }, "Tab",
-function ()
-	awful.client.focus.byidx(1)
-	if client.focus then
-		client.focus:raise()
-	end
-end,
-{description = "focus next", group = "client"}),
-
--- Standard program
-awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
-{description = "open a terminal", group = "launcher"}),
-awful.key({ modkey, "Control" }, "BackSpace", awesome.restart,
-{description = "reload awesome", group = "awesome"}),
-awful.key({ modkey, "Control"   }, "Escape", awesome.quit,
-{description = "quit awesome", group = "awesome"}),
-
-
-
-
-awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)          end,
-{description = "increase master width factor", group = "layout"}),
-
---awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)          end,
---{description = "decrease master width factor", group = "layout"}),
-
---awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1, nil, true) end,
---{description = "increase the number of master clients", group = "layout"}),
-
---awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1, nil, true) end,
---{description = "decrease the number of master clients", group = "layout"}),
-
---awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1, nil, true)    end,
---{description = "increase the number of columns", group = "layout"}),
-
-awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1, nil, true)    end,
-{description = "decrease the number of columns", group = "layout"}),
-
-awful.key({ modkey,           }, "space", function () awful.layout.inc( 1)                end,
-{description = "select next", group = "layout"}),
-
-awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(-1)                end,
-{description = "select previous", group = "layout"}),
-
-
---awful.key({ modkey, "Control" }, "n",
---function ()
---	local c = awful.client.restore()
-	-- Focus restored client
---	if c then
---		client.focus = c
---		c:raise()
---	end
---end,
---{description = "restore minimized", group = "client"}),
-
--- Prompt
-awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
-{description = "run prompt", group = "launcher"}),
-
-awful.key({ modkey }, "x",
-function ()
-	awful.prompt.run {
-		prompt       = "Run Lua code: ",
-		textbox      = awful.screen.focused().mypromptbox.widget,
-		exe_callback = awful.util.eval,
-		history_path = awful.util.get_cache_dir() .. "/history_eval"
-	}
-end,
-{description = "lua execute prompt", group = "awesome"}),
-
--- Menubar
-awful.key({ modkey }, "p", function() menubar.show() end,
-{description = "show the menubar", group = "launcher"})
+-- {{{ Client mouse bindings
+clientbuttons = awful.util.table.join(
+	awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+	awful.button({ modkey }, 1, awful.mouse.client.move),
+	awful.button({ modkey }, 3, awful.mouse.client.resize)
 )
+-- }}}
 
-clientkeys = awful.util.table.join(
-awful.key({ modkey,           }, "f",
-function (c)
-	c.fullscreen = not c.fullscreen
-	c:raise()
-end,
-{description = "toggle fullscreen", group = "client"}),
-awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end,
-{description = "close", group = "client"}),
-awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
-{description = "toggle floating", group = "client"}),
-awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end,
-{description = "move to master", group = "client"}),
-awful.key({ modkey,           }, "o",      function (c) c:move_to_screen()               end,
-{description = "move to screen", group = "client"}),
-awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
-{description = "toggle keep on top", group = "client"}),
+-- {{{ Global key bindings
+globalkeys = awful.util.table.join(
+	awful.key({ modkey }, "F2", function ()
+		currScreen = awful.screen.focused().index or 1
+		currTag = awful.tag.getidx(awful.tag.selected())
+		currText = awful.tag.selected().name:gsub("^%s*(.-)%s*$", "%1")
+		currText = currText:gsub('%[' .. currTag .. '%]', '')
+		currText = currText:gsub("^%s*(.-)%s*$", "%1")
 
--- Show/Hide Bottom Wibox
-awful.key({ modkey }, "b", function ()
-	if awful.screen.focused().mybotwibox then
-		awful.screen.focused().mybotwibox.visible = not awful.screen.focused().mybotwibox.visible
-	end
+		local dprompt = io.popen("echo "..currText.." | dmenu -m "..(currScreen - 1).." -fn 'Source Code Pro-14' -nb '#333333' -nf '#cccccc' -sb '#285577' -sf '#ffffff' -p 'Tag Name'", "r")
+		local dpromptOut = dprompt:read("*a"):gsub("^%s*(.-)%s*$", "%1")
+		dprompt:close()
 
-	if awful.screen.focused().mywibox then
-		awful.screen.focused().mywibox.visible = not awful.screen.focused().mywibox.visible
-	end
+		if string.len(dpromptOut) == 0 then
+			tagName = ''.. currTag ..''
+			awful.tag.selected().name = tagName
+		else
+			tagName = '[' .. currTag .. '] ' .. dpromptOut .. ''
+			awful.tag.selected().name = tagName
+		end
+	end, {description = "Rename current tag", group = "tag"}),
 
-	awful.screen.focused():emit_signal("arrange")
-end,
-{description = "hide the wibars", group = "layout"}),
+	-- Screen browsing
+	awful.key({ modkey }, "h", function () awful.screen.focus_bydirection("left") end,
+	{description = "focus screen to left", group = "screen"}),
 
---awful.key({ modkey,           }, "n",
---function (c)
-	-- The client currently has the input focus, so it cannot be
-	-- minimized, since minimized clients can't have the focus.
---	c.minimized = true
---end ,
---{description = "minimize", group = "client"}),
+	awful.key({ modkey }, "n", function () awful.screen.focus_bydirection("down") end,
+	{description = "focus screen down", group = "screen"}),
 
-awful.key({ modkey,           }, "m",
-function (c)
-	c.maximized = not c.maximized
-	c:raise()
-end ,
-{description = "maximize", group = "client"})
+	awful.key({ modkey }, "e", function () awful.screen.focus_bydirection("up") end,
+	{description = "focus screen up", group = "screen"}),
+
+	awful.key({ modkey }, "i", function () awful.screen.focus_bydirection("right") end,
+	{description = "focus screen to right", group = "screen"}),
+
+	-- Tag browsing
+	awful.key({ modkey }, "Left", awful.tag.viewprev,
+	{description = "view previous", group = "tag"}),
+
+	awful.key({ modkey }, "Right", awful.tag.viewnext,
+	{description = "view next", group = "tag"}),
+
+	awful.key({ modkey }, "Escape", awful.tag.history.restore,
+	{description = "go back", group = "tag"}),
+
+	awful.key({ modkey, "Shift" }, ",", awful.tag.viewprev,
+	{description = "view previous", group = "tag"}),
+
+	awful.key({ modkey, "Shift" }, ".", awful.tag.viewnext,
+	{description = "view next", group = "tag"}),
+
+	awful.key({ modkey }, ",", fleet.tag.viewprev_with_clients,
+	{description = "view previous with clients", group = "tag"}),
+
+	awful.key({ modkey }, ".", fleet.tag.viewnext_with_clients,
+	{description = "view next with clients", group = "tag"}),
+
+	-- Client browsing
+	awful.key({ modkey }, "Tab", function () awful.client.focus.byidx(1) end,
+	{description = "focus previous", group = "client"}),
+
+	awful.key({ modkey, "Shift" }, "Tab", function () awful.client.focus.byidx(-1) end,
+	{description = "focus next", group = "client"}),
+
+	awful.key({ modkey }, "u", awful.client.urgent.jumpto,
+	{description = "jump to urgent client", group = "client"}),
+
+	-- Layout manipulation
+	awful.key({ modkey }, "space", function () awful.layout.inc(1) end,
+	{description = "select next", group = "layout"}),
+
+	awful.key({ modkey, "Shift" }, "space", function () awful.layout.inc(-1) end,
+	{description = "select previous", group = "layout"}),
+
+	awful.key({ modkey }, "equal", function () awful.tag.incgap(1) end,
+	{description = "increase useless gap", group = "layout"}),
+
+	awful.key({ modkey }, "minus", function () awful.tag.incgap(-1) end,
+	{description = "decrease useless gap", group = "layout"}),
+
+	awful.key({ modkey }, "l", function () awful.tag.incmwfact(0.05) end,
+	{description = "increase master width factor", group = "layout"}),
+
+	awful.key({ modkey, "Control" }, "l", function () awful.tag.incncol(-1, nil, true) end,
+	{description = "decrease the number of columns", group = "layout"}),
+
+	--[[
+	awful.key({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end,
+	{description = "decrease master width factor", group = "layout"}),
+
+	awful.key({ modkey, "Shift" }, "h", function () awful.tag.incnmaster( 1, nil, true) end,
+	{description = "increase the number of master clients", group = "layout"}),
+
+	awful.key({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1, nil, true) end,
+	{description = "decrease the number of master clients", group = "layout"}),
+
+	awful.key({ modkey, "Control" }, "h", function () awful.tag.incncol( 1, nil, true) end,
+	{description = "increase the number of columns", group = "layout"}),
+	--]]
+
+	-- Client geometry
+	awful.key({ modkey, "Shift" }, "j", function () awful.client.swap.byidx(1) end,
+	{description = "swap with next client by index", group = "client"}),
+
+	awful.key({ modkey, "Shift" }, "k", function () awful.client.swap.byidx(-1) end,
+	{description = "swap with previous client by index", group = "client"}),
+
+	--[[
+	awful.key({ modkey, "Control" }, "n",
+	function ()
+		local c = awful.client.restore()
+
+		-- Focus restored client
+		if c then
+			client.focus = c
+			c:raise()
+		end
+	end,
+	{description = "restore minimized", group = "client"}),
+	--]]
+
+	-- Menus
+	awful.key({ modkey }, "w", function () mymainmenu:show() end,
+	{description = "show main menu", group = "awesome"}),
+
+	awful.key({ modkey }, "p", function() menubar.show() end,
+	{description = "show the menubar", group = "launcher"}),
+
+	-- Prompts
+	awful.key({ modkey }, "r", function () awful.screen.focused().mypromptbox:run() end,
+	{description = "run prompt", group = "launcher"}),
+
+	awful.key({ modkey }, "x",
+	function ()
+		awful.prompt.run {
+			prompt       = "Run Lua code: ",
+			textbox      = awful.screen.focused().mypromptbox.widget,
+			exe_callback = awful.util.eval,
+			history_path = awful.util.get_cache_dir() .. "/history_eval"
+		}
+	end,
+	{description = "lua execute prompt", group = "awesome"}),
+
+	awful.key({ modkey }, "b", function () fleet.layout.toggle_wibox({
+		awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end,
+	{description = "hide the wibars", group = "layout"}),
+
+	-- Help window
+	awful.key({ modkey }, "s", hotkeys_popup.show_help,
+	{description="show help", group="awesome"}),
+
+	-- Standard program
+	awful.key({ modkey }, "Return", function () awful.spawn(terminal) end,
+	{description = "open a terminal", group = "launcher"}),
+
+	awful.key({ modkey, "Control" }, "BackSpace", awesome.restart,
+	{description = "reload awesome", group = "awesome"}),
+
+	awful.key({ modkey, "Control" }, "Escape", awesome.quit,
+	{description = "quit awesome", group = "awesome"})
 )
 
 -- Bind all key numbers to tags.
@@ -802,13 +766,49 @@ for i = 1, 9 do
 	)
 end
 
-clientbuttons = awful.util.table.join(
-awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-awful.button({ modkey }, 1, awful.mouse.client.move),
-awful.button({ modkey }, 3, awful.mouse.client.resize))
-
 -- Set keys
 root.keys(globalkeys)
+-- }}}
+
+-- {{{ Client key bindings
+clientkeys = awful.util.table.join(
+	awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end,
+	{description = "move to master", group = "client"}),
+
+	awful.key({ modkey }, "o", function (c) c:move_to_screen() end,
+	{description = "move to screen", group = "client"}),
+
+	awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle,
+	{description = "toggle floating", group = "client"}),
+
+	--[[
+	awful.key({ modkey,           }, "n",
+	function (c)
+	-- The client currently has the input focus, so it cannot be
+	-- minimized, since minimized clients can't have the focus.
+		c.minimized = true
+	end ,
+	{description = "minimize", group = "client"}),
+	--]]
+
+	awful.key({ modkey }, "m", function (c)
+			c.maximized = not c.maximized
+			c:raise()
+		end ,
+	{description = "maximize", group = "client"}),
+
+	awful.key({ modkey }, "f", function (c)
+		c.fullscreen = not c.fullscreen
+		c:raise()
+	end,
+	{description = "toggle fullscreen", group = "client"}),
+
+	awful.key({ modkey }, "t", function (c) c.ontop = not c.ontop end,
+	{description = "toggle keep on top", group = "client"}),
+
+	awful.key({ modkey, "Shift"   }, "c", function (c) c:kill() end,
+	{description = "close", group = "client"})
+)
 -- }}}
 
 -- {{{ Rules
@@ -824,15 +824,15 @@ awful.rules.rules = {
 		keys = clientkeys,
 		buttons = clientbuttons,
 		screen = awful.screen.preferred,
-		placement = awful.placement.no_overlap+awful.placement.no_offscreen
+		placement = awful.placement.no_overlap+awful.placement.no_offscreen,
+		titlebars_enabled = false
 	}
 },
 
 -- Add titlebars to normal clients and dialogs
 { rule_any = {
 		type = {
-			"normal",
-			"dialog"
+			"normal"
 		}
 	},
 	properties = {
@@ -878,6 +878,7 @@ awful.rules.rules = {
 			"gnome",
 		},
 		class = {
+			"Geary",
 			"Chromium",
 			"Nautilus",
 			"Kruler",

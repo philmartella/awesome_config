@@ -12,7 +12,7 @@ theme.font                          = "sans 10"
 theme.fg_normal                     = "#FFFFFFFF"
 theme.bg_normal                     = "#000000AA"
 theme.fg_focus                      = "#0099CCFF"
-theme.bg_focus                      = "#000000AA"
+theme.bg_focus                      = "#FFFFFFFF"
 theme.fg_urgent                     = "#CC9393FF"
 theme.bg_urgent                     = "#2A1F1EFF"
 -- }}}
@@ -120,8 +120,8 @@ theme.systray_icon_spacing = 4
 -- {{{ Titlebar
 --theme.titlebar_bg_focus  = "xpm:" .. theme.titlebar_path .. "bg_left_focus.xpm"
 --theme.titlebar_bg_normal = "xpm:" .. theme.titlebar_path .. "bg_left_normal.xpm"
-theme.titlebar_bg_focus  = "#000000"
-theme.titlebar_bg_normal = "#000000"
+theme.titlebar_bg_focus  = "#000000AA"
+theme.titlebar_bg_normal = "#000000AA"
 
 theme.titlebar_close_button_focus               = theme.titlebar_path .. "close_focus.xpm"
 theme.titlebar_close_button_normal              = theme.titlebar_path .. "close_normal.xpm"

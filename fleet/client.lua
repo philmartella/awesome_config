@@ -12,27 +12,33 @@ local wibox = require("wibox")
 local awful = require("awful")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
+local naughty = require("naughty")
 
---- Client count widget.
-local clientcountbox = { mt = {} }
+-- client.mt: module (class) metatable
+-- client.wmt: widget (instance) metatable
+local client = { mt = {}, wmt = {} }
+client.wmt.__index = tag
 
-local function update ( w, s )
-    if w and s then
-        local count = 0
-        local tags = awful.tag.selectedlist(s)
+function client.focusbyidx (inc)
+	awful.client.focus.byidx(inc)
+	if client.focus then
+		client.focus:raise()
+	end
+end
 
-        for _, t in pairs(tags) do
-            count = count + #t.clients(t)
-        end
+function client.focusnext ()
+	client.focusbyidx(1)
+end
 
-        w:set_text(count)
-    end
+function client.focusprev ()
+	client.focusbyidx(-1)
 end
 
 --- Create a clientcountbox widget.
 -- @param screen The screen number that the layout will be represented for.
 -- @return textbox with number of clients on screen
-function clientcountbox.new ( s )
+--[[
+function client.countbox.new ( s )
 	local s = s or 1
 	local w = wibox.widget.textbox()
 
@@ -52,9 +58,22 @@ function clientcountbox.new ( s )
 	return w
 end
 
-function clientcountbox.mt:__call(...)
-    return clientcountbox.new(...)
+local function update ( w, s )
+    if w and s then
+        local count = 0
+        local tags = awful.tag.selectedlist(s)
+
+        for _, t in pairs(tags) do
+            count = count + #t.clients(t)
+        end
+
+        w:set_text(count)
+    end
 end
 
-return setmetatable(clientcountbox, clientcountbox.mt)
+function client.mt:__call(...)
+	return client.countbox.new(...)
+end
+--]]
 
+return setmetatable(client, client.mt)
