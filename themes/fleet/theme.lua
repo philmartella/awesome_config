@@ -7,7 +7,7 @@ theme.icon_dir                      = os.getenv("HOME") .. "/.config/awesome/the
 theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
 
 -- {{{ Fonts & Colors
-theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/themes/fleet/wallpaper.png"
+theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/wallpaper.png"
 theme.font                          = "sans 10"
 theme.fg_normal                     = "#FFFFFF"
 theme.bg_normal                     = "#000000"
