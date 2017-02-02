@@ -430,7 +430,7 @@ awful.screen.connect_for_each_screen(function(s)
 	s.myclientbox:set_widget(get_clientbuttons(nil, s))
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", height = 22, screen = s })
+	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, screen = s })
 
 	-- Add widgets to the wibox
 	s.mywibox:setup {
@@ -451,7 +451,7 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 32, screen = s })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 32, ontop = true, bg = "transparent", screen = s })
 
 		s.mybotwibox:setup {
 			layout = wibox.layout.align.horizontal,
@@ -721,6 +721,20 @@ awful.key({ modkey,           }, "o",      function (c) c:move_to_screen()      
 {description = "move to screen", group = "client"}),
 awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
 {description = "toggle keep on top", group = "client"}),
+
+-- Show/Hide Bottom Wibox
+awful.key({ modkey }, "b", function ()
+	if awful.screen.focused().mybotwibox then
+		awful.screen.focused().mybotwibox.visible = not awful.screen.focused().mybotwibox.visible
+	end
+
+	if awful.screen.focused().mywibox then
+		awful.screen.focused().mywibox.visible = not awful.screen.focused().mywibox.visible
+	end
+
+	awful.screen.focused():emit_signal("arrange")
+end,
+{description = "hide the wibars", group = "layout"}),
 
 --awful.key({ modkey,           }, "n",
 --function (c)

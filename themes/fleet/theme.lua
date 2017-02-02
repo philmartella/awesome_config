@@ -9,12 +9,12 @@ theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
 -- {{{ Fonts & Colors
 theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/wallpaper.png"
 theme.font                          = "sans 10"
-theme.fg_normal                     = "#FFFFFF"
-theme.bg_normal                     = "#000000"
-theme.fg_focus                      = "#0099CC"
-theme.bg_focus                      = "#000000"
-theme.fg_urgent                     = "#CC9393"
-theme.bg_urgent                     = "#2A1F1E"
+theme.fg_normal                     = "#FFFFFFFF"
+theme.bg_normal                     = "#000000AA"
+theme.fg_focus                      = "#0099CCFF"
+theme.bg_focus                      = "#000000AA"
+theme.fg_urgent                     = "#CC9393FF"
+theme.bg_urgent                     = "#2A1F1EFF"
 -- }}}
 
 -- {{{ Borders
@@ -101,13 +101,20 @@ theme.layout_floating               = theme.icon_dir .. "/floating.xpm"
 -- }}}
 
 -- {{{ Tasklist
-theme.tasklist_bg_normal            = "#000000"
+theme.tasklist_fg_normal            = "#777777"
+theme.tasklist_bg_normal            = "transparent"
 theme.tasklist_fg_focus             = "#4CB7DB"
-theme.tasklist_bg_focus             = "png:" .. theme.icon_dir .. "/bg_focus.png"
+theme.tasklist_bg_focus             = "transparent"
+--theme.tasklist_bg_focus             = "png:" .. theme.icon_dir .. "/bg_focus.png"
 theme.tasklist_disable_icon         = true
 theme.tasklist_maximized            = "⠲"
 theme.tasklist_sticky								= "⠶"
 theme.tasklist_floating             = "⠺"
+-- }}}
+
+-- {{{ Systray
+theme.bg_systray = "#00000000"
+theme.systray_icon_spacing = 4
 -- }}}
 
 -- {{{ Titlebar
