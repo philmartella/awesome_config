@@ -2,6 +2,7 @@ local pairs = pairs
 local awful = require("awful")
 local wibox = require("wibox")
 local naughty = require("naughty")
+local beautiful = require("beautiful")
 
 -- Keyboard Layout Switcher
 -- Keyboard map indicator and changer
@@ -39,6 +40,7 @@ function indicator:updateKey ( startup, key )
 						notification_id = naughty.notify({
 							text = tostring(led_status),
 							title = tostring(k.led),
+							icon = beautiful.icon_dir..'/key_'..k.key..'_'..led_status..'.png',
 							position = "bottom_right",
 							ontop = true,
 							fg = color,

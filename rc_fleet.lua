@@ -282,7 +282,7 @@ mymainmenu = awful.menu({
 		{ "open files", filemanager },
 		{ "open browser", browser },
 		{ "send email", email },
-		{ "window", mywmmenu },
+		{ "layout", mywmmenu },
 		{ "awesome", myawesomemenu, beautiful.awesome_icon },
 	}
 })
@@ -292,7 +292,7 @@ mysessionmenu = awful.menu({
 		{ "lock", lockscreen_cmd },
 		{ "restart", function() awesome.restart() end },
 		{ "quit", function() awesome.quit() end},
-		{ "system", mysysmenu, beautiful.application_icon },
+		{ "system", mysysmenu },
 	}
 })
 
@@ -805,97 +805,132 @@ clientkeys = awful.util.table.join(
 	awful.key({ modkey, "Shift"   }, "c", function (c) c:kill() end,
 	{description = "close", group = "client"})
 )
+
+-- Bind keypad to move and resize client
+NumericPad = { "KP_End", "KP_Down", "KP_Next", "KP_Left", "KP_Begin", "KP_Right", "KP_Home", "KP_Up", "KP_Prior" }
+NumericPadMap = {
+	{-16,16,16,16}, {0,16,0,16,"down"}, {16,16,16,16},
+	{-16,0,16,0,"left"}, {0,0,0,0}, {16,0,16,0,"right"},
+	{-16,-16,16,16}, {0,-16,0,16,"up"}, {16,-16,16,16}
+}
+
+for i = 1, 9 do
+	clientkeys = awful.util.table.join(clientkeys,
+	awful.key({ modkey }, NumericPad[i],
+	function (c)
+		if awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating then
+			awful.client.moveresize(NumericPadMap[i][1], NumericPadMap[i][2], 0, 0, c)
+		elseif NumericPadMap[i][5] then
+			awful.client.swap.bydirection(NumericPadMap[i][5], c)
+		end
+	end, {description = "move client", group = "client"}),
+	awful.key({ modkey, "Shift" }, NumericPad[i],
+	function (c)
+		if not awful.client.isfixed(c) then
+			local x = NumericPadMap[i][1]
+			local y = NumericPadMap[i][2]
+			if x > 0 then x = 0 end
+			if y > 0 then y = 0 end
+			awful.client.moveresize(x, y, NumericPadMap[i][3], NumericPadMap[i][4], c)
+		end
+	end, {description = "grow client", group = "client"}),
+	awful.key({ modkey, "Control" }, NumericPad[i],
+	function (c)
+		if not awful.client.isfixed(c) then
+			local x = NumericPadMap[i][1] * -1
+			local y = NumericPadMap[i][2] * -1
+			if x < 0 then x = 0 end
+			if y < 0 then y = 0 end
+			awful.client.moveresize(x, y, NumericPadMap[i][3] * -1, NumericPadMap[i][4] * -1, c)
+		end
+	end, {description = "shrink client", group = "client"}))
+end
 -- }}}
 
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
--- All clients will match this rule.
-{ rule = { },
-	properties = {
-		border_width = beautiful.border_width,
-		border_color = beautiful.border_normal,
-		focus = awful.client.focus.filter,
-		raise = true,
-		keys = clientkeys,
-		buttons = clientbuttons,
-		screen = awful.screen.preferred,
-		placement = awful.placement.no_overlap+awful.placement.no_offscreen,
-		titlebars_enabled = false
-	}
-},
-
--- Add titlebars to normal clients and dialogs
-{ rule_any = {
-		type = {
-			"normal"
+	-- All clients will match this rule.
+	{ rule = { },
+		properties = {
+			border_width = beautiful.border_width,
+			border_color = beautiful.border_normal,
+			focus = awful.client.focus.filter,
+			raise = true,
+			keys = clientkeys,
+			buttons = clientbuttons,
+			screen = awful.screen.preferred,
+			placement = awful.placement.no_overlap+awful.placement.no_offscreen,
+			titlebars_enabled = false
 		}
 	},
-	properties = {
-		titlebars_enabled = true
-	}
-},
 
--- Floating clients.
-{ rule_any = {
-		instance = {
-			"DTA",  -- Firefox addon DownThemAll.
-			"copyq",  -- Includes session name in class.
-		},
-		class = {
-			"Arandr",
-			"Gpick",
-			"Kruler",
-			"MessageWin",  -- kalarm.
-			"Sxiv",
-			"Wpa_gui",
-			"pinentry",
-			"veromix",
-			"xtightvncviewer",
-			"MPlayer",
-			"Gtk-recordMyDesktop"
-		},
-		name = {
-			"Event Tester",  -- xev.
-		},
-		role = {
-			"AlarmWindow",  -- Thunderbird's calendar.
-			"pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
-		}
-	},
-	properties = {
-		floating = true
-	},
-},
+	-- Add titlebars to normal clients
+	{ rule = { type = "normal" },
+		properties = { titlebars_enabled = true } },
 
--- No titlebar clients
-{ rule_any = {
-		instance = {
-			"gnome",
+	-- Center placement of dialog clients
+	{ rule = { type = "dialog" },
+		properties = { placement = awful.placement.centered } },
+
+	-- Floating clients.
+	{ rule_any = {
+			instance = {
+				"DTA",  -- Firefox addon DownThemAll.
+				"copyq",  -- Includes session name in class.
+			},
+			class = {
+				"Arandr",
+				"Gpick",
+				"Kruler",
+				"MessageWin",  -- kalarm.
+				"Sxiv",
+				"Wpa_gui",
+				"pinentry",
+				"veromix",
+				"xtightvncviewer",
+				"MPlayer",
+				"Gtk-recordMyDesktop"
+			},
+			name = {
+				"Event Tester",  -- xev.
+			},
+			role = {
+				"AlarmWindow",  -- Thunderbird's calendar.
+				"pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+			}
 		},
-		class = {
-			"Geary",
-			"Chromium",
-			"Nautilus",
-			"Kruler",
-			"MessageWin",
-			"Gtk-recordMyDesktop",
-			"Wallp"
+		properties = {
+			floating = true
 		},
-		name = {
-			"Event Tester",
-		},
-		role = {
-			"AlarmWindow",
-		}
 	},
-	properties = {
-		titlebars_enabled = false
+
+	-- No titlebar clients
+	{ rule_any = {
+			instance = {
+				"gnome",
+				"gpk",
+			},
+			class = {
+				"Geary",
+				"Chromium",
+				"Nautilus",
+				"Kruler",
+				"MessageWin",
+				"Gtk-recordMyDesktop",
+				"Wallp"
+			},
+			name = {
+				"Event Tester",
+			},
+			role = {
+				"AlarmWindow",
+			}
+		},
+		properties = {
+			titlebars_enabled = false
+		}
 	}
-}
--- Set Firefox to always map on the tag named "2" on screen 1.
--- { rule = { class = "Firefox" },
---   properties = { screen = 1, tag = "2" } },
 }
 -- }}}
 
