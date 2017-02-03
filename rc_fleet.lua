@@ -10,8 +10,10 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
--- Fleet widget libraries
+-- Alternative widget libraries
+local vicious = require("vicious")
 local fleet = require("fleet")
+local volume_control = require("volume-control")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -234,9 +236,7 @@ function get_clientbuttons ( c, s )
 		clientbuttons_layout:add(clienticon_margin)
 		clientbuttons_layout:add(spr_small_empty)
 		clientbuttons_layout:add(clientname_layout)
-		clientbuttons_layout:add(spr_empty)
-		clientbuttons_layout:add(bar_empty)
-		clientbuttons_layout:add(spr_small_empty)
+		clientbuttons_layout:add(bar)
 		clientbuttons_layout:add(button_float)
 		clientbuttons_layout:add(spr_small_empty)
 		clientbuttons_layout:add(button_maximize)
@@ -244,9 +244,7 @@ function get_clientbuttons ( c, s )
 		clientbuttons_layout:add(button_sticky)
 		clientbuttons_layout:add(spr_small_empty)
 		clientbuttons_layout:add(button_ontop)
-		clientbuttons_layout:add(spr_small_empty)
-		clientbuttons_layout:add(bar_empty)
-		clientbuttons_layout:add(spr_small_empty)
+		clientbuttons_layout:add(bar)
 		clientbuttons_layout:add(button_close)
 	end
 
@@ -317,81 +315,140 @@ menubar.geometry = { y = 0, height = 22 }
 
 -- {{{ Wibar Widgets
 -- Separators
-last = wibox.widget.imagebox()
-last:set_image(beautiful.last)
-
-spr = wibox.widget.imagebox()
-spr:set_image(beautiful.spr)
-
-spr_small = wibox.widget.imagebox()
-spr_small:set_image(beautiful.spr_small)
-
-spr_very_small = wibox.widget.imagebox()
-spr_very_small:set_image(beautiful.spr_very_small)
-
-spr_right = wibox.widget.imagebox()
-spr_right:set_image(beautiful.spr_right)
-
-spr_left = wibox.widget.imagebox()
-spr_left:set_image(beautiful.spr_left)
-
-spr_empty = wibox.widget.imagebox()
-spr_empty:set_image(beautiful.spr_empty)
-
 spr_small_empty = wibox.widget.imagebox()
 spr_small_empty:set_image(beautiful.spr_small_empty)
 
 bar = wibox.widget.imagebox()
 bar:set_image(beautiful.bar)
 
-bar_empty = wibox.widget.imagebox()
-bar_empty:set_image(beautiful.bar_empty)
-
 -- Keyboard map indicator and switcher
-kbdcfg = fleet.widget.keyboardlayoutindicator({
-	layouts = {
-		{ name = "colemak ", layout = "us", variant = "colemak", color = "#80CCE6" },
-		{ name = "dvorak ", layout = "us", variant = "dvorak", color = "#FF9F9F" },
-		{ name = "qwerty ", layout = "us", variant = nil }
+kbdcfg = fleet.widget.keyboardlayoutindicator(
+	{
+		{ name = "colemak", layout = "us", variant = "colemak", color = "#81B7E1" },
+		{ name = "dvorak", layout = "us", variant = "dvorak", color = "#E18181" },
+		{ name = "qwerty", layout = "us", variant = nil }
 	},
-	keys = {
+	{
 		{ name = "[1]", key = "Num_Lock", led = "Num Lock" },
 		{ name = "[A]", key = "Caps_Lock", led = "Caps Lock" }
 	},
-	dividers = {
+	{
 		section = bar,
-		keys = spr_small
+		keys = spr_small_empty
 	}
-})
+)
+
+--[[
+keyboardwidget = wibox.widget {
+	{
+		image = beautiful.keyboard,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	{
+		layouts = {
+			{ name = "colemak ", layout = "us", variant = "colemak", color = "#81B7E1" },
+			{ name = "dvorak ", layout = "us", variant = "dvorak", color = "#E18181" },
+			{ name = "qwerty ", layout = "us", variant = nil }
+		},
+		keys = {
+			{ name = "[1]", key = "Num_Lock", led = "Num Lock" },
+			{ name = "[A]", key = "Caps_Lock", led = "Caps Lock" }
+		},
+		dividers = {
+			section = bar,
+			keys = spr_small
+		},
+		widget = fleet.widget.keyboardlayoutindicator
+	},
+	layout = wibox.layout.fixed.horizontal
+}
+--]]
+
 kbdwidget = wibox.widget.background()
 kbdicon = wibox.widget.imagebox()
 kbdicon:set_image(beautiful.keyboard)
-kbdwidget:set_widget(kbdcfg.widget)
+kbdwidget:set_widget(kbdcfg)
 kbdwidget:set_bgimage(beautiful.widget_bg)
---mykeyboardlayout = wibox()
---mykeyboardlayout:setup {
---	layout = wibox.layout.align.horizontal,
---	kbdicon,
---	kbdwidgetb,
---}
-mykeyboardlayout = awful.widget.keyboardlayout()
 
--- Clock
-mytextclock = wibox.widget.textclock("<span foreground='#FFFFFF'>%H:%M</span>")
-clock_icon = wibox.widget.imagebox()
-clock_icon:set_image(beautiful.clock)
-clockwidget = wibox.widget.background()
-clockwidget:set_widget(mytextclock)
-clockwidget:set_bgimage(beautiful.widget_bg)
+-- Date and time
+datewidget = wibox.widget {
+	{
+		image = beautiful.clock,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	{
+		format = "<span foreground='#FFFFFF'>%a, %b %d %H:%M</span>",
+		widget = wibox.widget.textclock
+	},
+	layout = wibox.layout.fixed.horizontal
+}
 
--- Calendar
-mytextcalendar = wibox.widget.textclock("<span foreground='#FFFFFF'>%a, %b %d</span>")
-calendar_icon = wibox.widget.imagebox()
-calendar_icon:set_image(beautiful.calendar)
-calendarwidget = wibox.widget.background()
-calendarwidget:set_widget(mytextcalendar)
-calendarwidget:set_bgimage(beautiful.widget_bg)
---lain.widgets.calendar:attach(calendarwidget, { fg = "#FFFFFF", position = "bottom_right", font = "Monospace Regular", font_size = "12" })
+-- Volume control
+volumecfg = volume_control({channel="Master"})
+
+volumewidget = wibox.widget {
+	{
+		image = beautiful.mpd,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	{
+		id = "prog",
+		max_value = 1,
+		value = 0,
+		forced_height = 20,
+		forced_width = 100,
+		paddings = 1,
+		border_width = 1,
+		margins = {
+			top = 2,
+			bottom = 2,
+		},
+		widget = wibox.widget.progressbar,
+	},
+	layout = wibox.layout.fixed.horizontal
+}
+
+vicious.register(volumewidget.prog, vicious.widgets.volume, function(widget, args)
+	local color = { ["♫"] = "#81B7E1", ["♩"] = "#E18181" }
+
+	widget.color = color[args[2]]
+
+	return args[1]
+end, 10, "Master")
+
+-- CPU
+cpuwidgetperc = wibox.widget {
+	markup = '<span color="#FFFFFF">**</span>',
+	widget = wibox.widget.textbox,
+}
+
+cpuwidget = wibox.widget {
+	{
+		image = beautiful.cpu,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	cpuwidgetperc,
+	layout = wibox.layout.fixed.horizontal
+}
+
+vicious.register(cpuwidgetperc, vicious.widgets.cpu, function (widget, args)
+	local color = '#8AE181'
+	local perc = tostring(args[1])
+
+	if args[1] < 10 then
+		perc = '0'..tostring(args[1])
+	elseif args[1] > 70 then
+		color = '#E18181'
+	elseif args[1] > 40 then
+		color = '#E1C381'
+	end
+
+	return '<span color="'..color..'">'..perc..'%</span>'
+end, 2)
 
 -- Taglist
 local taglist_buttons = awful.util.table.join(
@@ -494,42 +551,20 @@ awful.screen.connect_for_each_screen(function(s)
 			layout = wibox.layout.align.horizontal,
 			{ -- Left widgets
 				layout = wibox.layout.fixed.horizontal,
-				spr_left,
-				mylauncher,
-				spr_right,
-				spr_left,
-				mysesslauncher,
-				spr_right,
-				wibox.widget.systray(),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(mylauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(mysesslauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(volumewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(wibox.widget.systray(), 5, 5, 0, 0), "#000000"), 2, 2, 5, 5),
 			},
 			{ -- Middle widgets
 				layout = wibox.layout.fixed.horizontal,
 			},
 			{ -- Right widgets
 				layout = wibox.layout.fixed.horizontal,
-				spr_left,
-				kbdicon,
-				bar,
-				spr_small,
-				kbdwidget,
-				spr_small,
-				spr_right,
-
-				spr_left,
-				calendar_icon,
-				bar,
-				spr_small,
-				calendarwidget,
-				spr_small,
-				spr_right,
-
-				spr_left,
-				clock_icon,
-				bar,
-				spr_small,
-				clockwidget,
-				spr_small,
-				spr_right,
+				wibox.container.margin(wibox.container.background(wibox.container.margin(cpuwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(volumecfg.widget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(kbdwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(datewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 			},
 		}
 	end
@@ -702,6 +737,11 @@ globalkeys = awful.util.table.join(
 	{description="show help", group="awesome"}),
 
 	-- Standard program
+	awful.key({}, "XF86AudioRaiseVolume", function() volumecfg:up() end),
+	awful.key({}, "XF86AudioLowerVolume", function() volumecfg:down() end),
+	awful.key({}, "XF86AudioMute", function() volumecfg:toggle() end),
+
+	-- Awesome
 	awful.key({ modkey }, "Return", function () awful.spawn(terminal) end,
 	{description = "open a terminal", group = "launcher"}),
 
@@ -1005,9 +1045,7 @@ client.connect_signal("request::titlebars", function(c)
 			awful.titlebar.widget.stickybutton(c),
 			spr_small_empty,
 			awful.titlebar.widget.ontopbutton(c),
-			spr_small_empty,
-			bar_empty,
-			spr_small_empty,
+			bar,
 			awful.titlebar.widget.closebutton(c),
 		},
 	}

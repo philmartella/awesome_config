@@ -113,9 +113,16 @@ theme.tasklist_floating             = "⠺"
 -- }}}
 
 -- {{{ Systray
-theme.bg_systray = "#00000000"
+theme.bg_systray = "#000000FF"
 theme.systray_icon_spacing = 4
 -- }}}
+
+--{{{ Progress Bar
+theme.progressbar_bg                = "#222222"
+theme.progressbar_fg                = "#81B7E1"
+theme.progressbar_border_color      = "#777777"
+theme.progressbar_bar_border_color  = "#AAAAAA"
+--}}}
 
 -- {{{ Titlebar
 --theme.titlebar_bg_focus  = "xpm:" .. theme.titlebar_path .. "bg_left_focus.xpm"

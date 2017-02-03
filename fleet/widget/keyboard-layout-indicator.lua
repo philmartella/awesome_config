@@ -31,7 +31,7 @@ function indicator:updateKey ( startup, key )
 
 				if led_status then
 					if 'on' == led_status then
-						color = '#77FF77FF'
+						color = '#8AE181FF'
 					elseif 'off' == led_status then
 						color = '#777777FF'
 					end
@@ -72,25 +72,37 @@ function indicator:statKeyWidget ()
 			awful.button({ }, 2, function() self:toggleKey(k.key) end)
 		))
 
-		if self.dividers.keys then
+		self.widget:add(self.keywidgets[_])
+
+		if self.dividers.keys and _ ~= #self.keys then
 			self.widget:add(self.dividers.keys)
 		end
-
-		self.widget:add(self.keywidgets[_])
 	end
 
 	self:updateKey(true)
 end
 
-function indicator.new ( args )
+function indicator:set_layouts (layouts)
+	self.layouts = layouts or {}
+end
+
+function indicator:set_keys (keys)
+	self.keys = keys or {}
+end
+
+function indicator:set_dividers (dividers)
+	self.dividers = dividers or {}
+end
+
+function indicator.new ( layouts, keys, dividers )
 	local sw = setmetatable({}, indicator.wmt)
 
 	sw.keywidgets = {}
 
 	sw.cmd = "setxkbmap"
-	sw.layouts = args.layouts or {}
-	sw.keys = args.keys or {}
-	sw.dividers = args.dividers or {}
+	sw.layouts = layouts or {}
+	sw.keys = keys or {}
+	sw.dividers = dividers or {}
 
 	sw.index = 1
 	sw.current = nil
@@ -114,14 +126,9 @@ function indicator.new ( args )
 	end
 
 	sw:statKeyWidget()
---[[
-	sw.timer = timer({ timeout = args.timeout or 10 })
-	sw.timer:connect_signal("timeout", function() sw:get() end)
-	sw.timer:start()
-]]
 	sw:set(sw.index)
 
-	return sw
+	return sw.widget
 end
 
 function indicator:set(i)
