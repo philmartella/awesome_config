@@ -41,7 +41,7 @@ function indicator:updateKey ( startup, key )
 							text = tostring(led_status),
 							title = tostring(k.led),
 							icon = beautiful.icon_dir..'/key_'..k.key..'_'..led_status..'.png',
-							position = "bottom_right",
+							position = "bottom_left",
 							ontop = true,
 							fg = color,
 							bg = "#000000FF",

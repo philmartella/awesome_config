@@ -13,7 +13,7 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- Alternative widget libraries
 local vicious = require("vicious")
 local fleet = require("fleet")
-local volume_control = require("volume-control")
+--local volume_control = require("volume-control")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -386,7 +386,7 @@ datewidget = wibox.widget {
 }
 
 -- Volume control
-volumecfg = volume_control({channel="Master"})
+--volumecfg = volume_control({channel="Master"})
 
 volumewidget = wibox.widget {
 	{
@@ -420,22 +420,21 @@ vicious.register(volumewidget.prog, vicious.widgets.volume, function(widget, arg
 end, 10, "Master")
 
 -- CPU
-cpuwidgetperc = wibox.widget {
-	markup = '<span color="#FFFFFF">**</span>',
-	widget = wibox.widget.textbox,
-}
-
 cpuwidget = wibox.widget {
 	{
 		image = beautiful.cpu,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
-	cpuwidgetperc,
+	{
+		id = "perc",
+		markup = '<span color="#FFFFFF">**</span>',
+		widget = wibox.widget.textbox,
+	},
 	layout = wibox.layout.fixed.horizontal
 }
 
-vicious.register(cpuwidgetperc, vicious.widgets.cpu, function (widget, args)
+vicious.register(cpuwidget.perc, vicious.widgets.cpu, function (widget, args)
 	local color = '#8AE181'
 	local perc = tostring(args[1])
 
@@ -449,6 +448,79 @@ vicious.register(cpuwidgetperc, vicious.widgets.cpu, function (widget, args)
 
 	return '<span color="'..color..'">'..perc..'%</span>'
 end, 2)
+
+-- Memory
+memwidget = wibox.widget {
+	{
+		image = beautiful.mem,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	{
+		id = "usage",
+		markup = '<span color="#FFFFFF">**</span>',
+		widget = wibox.widget.textbox,
+	},
+	layout = wibox.layout.fixed.horizontal
+}
+
+vicious.register(memwidget.usage, vicious.widgets.mem, function (widget, args)
+	local color = '#8AE181'
+	local usage = 0
+	local metric = 'B'
+
+	if args[1] > 70 then
+		color = '#E18181'
+	elseif args[1] > 40 then
+		color = '#E1C381'
+	end
+
+	if args[9] > 1000000 then
+		usage = string.format("%.2f", (args[9] / 1048576))
+		metric = 'TB'
+	elseif args[9] > 1000 then
+		usage = string.format("%.2f", (args[9] / 1024))
+		metric = 'GB'
+	else
+		usage = string.format("%.2f", args[9])
+		metric = 'MB'
+	end
+
+	return '<span color="'..color..'">'..usage..'</span> '..metric
+end, 2)
+
+-- Disk IO
+diowidget = wibox.widget {
+	{
+		image = beautiful.hdd,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	{
+		id = "disk",
+		markup = '<span color="#FFFFFF">sda</span>',
+		widget = wibox.widget.textbox,
+	},
+	bar,
+	{
+		id = "reads",
+		markup = '<span color="#FFFFFF">**</span>',
+		widget = wibox.widget.textbox,
+	},
+	bar,
+	{
+		id = "writes",
+		markup = '<span color="#FFFFFF">**</span>',
+		widget = wibox.widget.textbox,
+	},
+	layout = wibox.layout.fixed.horizontal
+}
+
+vicious.register(diowidget, vicious.widgets.dio, function (widget, args)
+	widget.reads:set_markup('<span color="#8AE181">'..math.ceil(args["{sda read_kb}"])..'</span> KBs')
+	widget.writes:set_markup('<span color="#8AE181">'..math.ceil(args["{sda write_kb}"])..'</span> KBs')
+	return
+end, 5)
 
 -- Taglist
 local taglist_buttons = awful.util.table.join(
@@ -553,6 +625,7 @@ awful.screen.connect_for_each_screen(function(s)
 				layout = wibox.layout.fixed.horizontal,
 				wibox.container.margin(wibox.container.background(wibox.container.margin(mylauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(mysesslauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(kbdwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(volumewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(wibox.widget.systray(), 5, 5, 0, 0), "#000000"), 2, 2, 5, 5),
 			},
@@ -562,8 +635,8 @@ awful.screen.connect_for_each_screen(function(s)
 			{ -- Right widgets
 				layout = wibox.layout.fixed.horizontal,
 				wibox.container.margin(wibox.container.background(wibox.container.margin(cpuwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(volumecfg.widget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(kbdwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(memwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(diowidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(datewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 			},
 		}
@@ -737,9 +810,9 @@ globalkeys = awful.util.table.join(
 	{description="show help", group="awesome"}),
 
 	-- Standard program
-	awful.key({}, "XF86AudioRaiseVolume", function() volumecfg:up() end),
-	awful.key({}, "XF86AudioLowerVolume", function() volumecfg:down() end),
-	awful.key({}, "XF86AudioMute", function() volumecfg:toggle() end),
+	--awful.key({}, "XF86AudioRaiseVolume", function() volumecfg:up() end),
+	--awful.key({}, "XF86AudioLowerVolume", function() volumecfg:down() end),
+	--awful.key({}, "XF86AudioMute", function() volumecfg:toggle() end),
 
 	-- Awesome
 	awful.key({ modkey }, "Return", function () awful.spawn(terminal) end,
