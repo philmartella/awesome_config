@@ -2,7 +2,7 @@
 static char *sticky_normal_inactive[] = {
 /* columns rows colors chars-per-pixel */
 "18 18 2 1 ",
-"  c #949FA7",
+"  c #777777",
 ". c None",
 /* pixels */
 "..................",

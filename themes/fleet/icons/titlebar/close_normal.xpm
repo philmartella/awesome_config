@@ -2,7 +2,7 @@
 static char *close_normal[] = {
 /* columns rows colors chars-per-pixel */
 "18 18 2 1 ",
-"  c #A79494",
+"  c #E18181",
 ". c None",
 /* pixels */
 "..................",

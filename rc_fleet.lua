@@ -338,52 +338,47 @@ kbdcfg = fleet.widget.keyboardlayoutindicator(
 	}
 )
 
---[[
 keyboardwidget = wibox.widget {
 	{
 		image = beautiful.keyboard,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
+	kbdcfg,
+	layout = wibox.layout.fixed.horizontal
+}
+
+-- Date
+datewidget = wibox.widget {
 	{
-		layouts = {
-			{ name = "colemak ", layout = "us", variant = "colemak", color = "#81B7E1" },
-			{ name = "dvorak ", layout = "us", variant = "dvorak", color = "#E18181" },
-			{ name = "qwerty ", layout = "us", variant = nil }
-		},
-		keys = {
-			{ name = "[1]", key = "Num_Lock", led = "Num Lock" },
-			{ name = "[A]", key = "Caps_Lock", led = "Caps Lock" }
-		},
-		dividers = {
-			section = bar,
-			keys = spr_small
-		},
-		widget = fleet.widget.keyboardlayoutindicator
+		image = beautiful.calendar,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	{
+		id = "date",
+		widget = wibox.widget.textbox,
 	},
 	layout = wibox.layout.fixed.horizontal
 }
---]]
 
-kbdwidget = wibox.widget.background()
-kbdicon = wibox.widget.imagebox()
-kbdicon:set_image(beautiful.keyboard)
-kbdwidget:set_widget(kbdcfg)
-kbdwidget:set_bgimage(beautiful.widget_bg)
+vicious.register(datewidget.date, vicious.widgets.date, '%a, %b %d', 60)
 
--- Date and time
-datewidget = wibox.widget {
+-- time
+timewidget = wibox.widget {
 	{
 		image = beautiful.clock,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
 	{
-		format = "<span foreground='#FFFFFF'>%a, %b %d %H:%M</span>",
-		widget = wibox.widget.textclock
+		id = "time",
+		widget = wibox.widget.textbox,
 	},
 	layout = wibox.layout.fixed.horizontal
 }
+
+vicious.register(timewidget.time, vicious.widgets.date, '%H:%M', 60)
 
 -- Volume control
 --volumecfg = volume_control({channel="Master"})
@@ -446,8 +441,8 @@ vicious.register(cpuwidget.perc, vicious.widgets.cpu, function (widget, args)
 		color = '#E1C381'
 	end
 
-	return '<span color="'..color..'">'..perc..'%</span>'
-end, 2)
+	return '<span color="'..color..'">'..perc..'</span> %'
+end, 1)
 
 -- Memory
 memwidget = wibox.widget {
@@ -468,6 +463,7 @@ vicious.register(memwidget.usage, vicious.widgets.mem, function (widget, args)
 	local color = '#8AE181'
 	local usage = 0
 	local metric = 'B'
+	local used = ''
 
 	if args[1] > 70 then
 		color = '#E18181'
@@ -475,18 +471,26 @@ vicious.register(memwidget.usage, vicious.widgets.mem, function (widget, args)
 		color = '#E1C381'
 	end
 
-	if args[9] > 1000000 then
-		usage = string.format("%.2f", (args[9] / 1048576))
+	if args[9] > 999999 then
+		usage = args[9] / 1048576
 		metric = 'TB'
-	elseif args[9] > 1000 then
-		usage = string.format("%.2f", (args[9] / 1024))
+	elseif args[9] > 999 then
+		usage = args[9] / 1024
 		metric = 'GB'
 	else
-		usage = string.format("%.2f", args[9])
+		usage = args[9]
 		metric = 'MB'
 	end
 
-	return '<span color="'..color..'">'..usage..'</span> '..metric
+	if usage > 99.9 then
+		used = tostring(math.ceil(usage))..'.'
+	elseif usage > 9.99 then
+		used = string.format("%.1f", usage)
+	else
+		used = string.format("%.2f", usage)
+	end
+
+	return '<span color="'..color..'">'..used..'</span> '..metric
 end, 2)
 
 -- Disk IO
@@ -498,29 +502,103 @@ diowidget = wibox.widget {
 	bar,
 	{
 		id = "disk",
-		markup = '<span color="#FFFFFF">sda</span>',
+		markup = '<span color="#FFFFFF"></span>',
 		widget = wibox.widget.textbox,
 	},
 	bar,
 	{
 		id = "reads",
-		markup = '<span color="#FFFFFF">**</span>',
+		markup = '<span color="#FFFFFF">0.00</span>',
 		widget = wibox.widget.textbox,
 	},
 	bar,
 	{
 		id = "writes",
-		markup = '<span color="#FFFFFF">**</span>',
+		markup = '<span color="#FFFFFF">0.00</span>',
 		widget = wibox.widget.textbox,
 	},
 	layout = wibox.layout.fixed.horizontal
 }
 
 vicious.register(diowidget, vicious.widgets.dio, function (widget, args)
-	widget.reads:set_markup('<span color="#8AE181">'..math.ceil(args["{sda read_kb}"])..'</span> KBs')
-	widget.writes:set_markup('<span color="#8AE181">'..math.ceil(args["{sda write_kb}"])..'</span> KBs')
+	local dev = 'sda'
+	local d_c = '#777777'
+	local r_s = 0
+	local w_s = 0
+	local r_m = 'B'
+	local w_m = 'B'
+	local r_c = '#8AE181'
+	local w_c = '#8AE181'
+	local reads = '0.00'
+	local writes = '0.00'
+	local r_kb = tonumber(args['{'..dev..' read_kb}'])
+	local w_kb = tonumber(args['{'..dev..' write_kb}'])
+
+	if r_kb > 999999999 then
+		r_s = r_kb / 1073741824
+		r_m = 'TB'
+	elseif r_kb > 999999 then
+		r_s = r_kb / 1048576
+		r_m = 'GB'
+	elseif r_kb > 999 then
+		r_s = r_kb / 1024
+		r_m = 'MB'
+	else
+		r_s = r_kb
+		r_m = 'KB'
+	end
+
+	if r_s > 99.9 then
+		reads = tostring(math.ceil(r_s))..'.'
+	elseif r_s > 9.99 then
+		reads = string.format("%.1f", r_s)
+	else
+		reads = string.format("%.2f", r_s)
+	end
+
+	if w_kb > 10240 then
+		w_c = '#E18181'
+	elseif w_kb > 5120 then
+		w_c = '#E1C381'
+	end
+
+	if w_kb > 999999999 then
+		w_s = w_kb / 1073741824
+		w_m = 'TB'
+	elseif w_kb > 999999 then
+		w_s = w_kb / 1048576
+		w_m = 'GB'
+	elseif w_kb > 999 then
+		w_s = w_kb / 1024
+		w_m = 'MB'
+	else
+		w_s = w_kb
+		w_m = 'KB'
+	end
+
+	if w_s > 99.9 then
+		writes = tostring(math.ceil(w_s))..'.'
+	elseif w_s > 9.99 then
+		writes = string.format('%.1f', w_s)
+	else
+		writes = string.format('%.2f', w_s)
+	end
+
+	if w_kb > 10240 then
+		w_c = '#E18181'
+	elseif w_kb > 5120 then
+		w_c = '#E1C381'
+	end
+
+	if r_kb > 1 or w_kb > 1 then
+		d_c = '#FFFFFF'
+	end
+
+	widget.disk:set_markup('<span color="'..d_c..'">'..dev..'</span>')
+	widget.reads:set_markup('<span color="'..r_c..'">'..reads..'</span> '..r_m..'s')
+	widget.writes:set_markup('<span color="'..w_c..'">'..writes..'</span> '..w_m..'s')
 	return
-end, 5)
+end, 1)
 
 -- Taglist
 local taglist_buttons = awful.util.table.join(
@@ -625,7 +703,7 @@ awful.screen.connect_for_each_screen(function(s)
 				layout = wibox.layout.fixed.horizontal,
 				wibox.container.margin(wibox.container.background(wibox.container.margin(mylauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(mysesslauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(kbdwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(keyboardwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(volumewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(wibox.widget.systray(), 5, 5, 0, 0), "#000000"), 2, 2, 5, 5),
 			},
@@ -638,6 +716,7 @@ awful.screen.connect_for_each_screen(function(s)
 				wibox.container.margin(wibox.container.background(wibox.container.margin(memwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(diowidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 				wibox.container.margin(wibox.container.background(wibox.container.margin(datewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wibox.container.margin(wibox.container.background(wibox.container.margin(timewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
 			},
 		}
 	end

@@ -2,7 +2,7 @@
 static char *maximized_normal_inactive[] = {
 /* columns rows colors chars-per-pixel */
 "18 18 2 1 ",
-"  c #96A794",
+"  c #777777",
 ". c None",
 /* pixels */
 "..................",
