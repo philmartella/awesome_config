@@ -27,13 +27,16 @@ function indicator:updateKey ( startup, key )
 		for _, k in pairs(self.keys) do
 			if k.led then
 				local color = '#FF0000FF'
+				local strike = 'false'
 				local led_status = string.match(out, k.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
 
 				if led_status then
 					if 'on' == led_status then
 						color = '#8AE181FF'
+						strike = 'false'
 					elseif 'off' == led_status then
 						color = '#777777FF'
+						strike = 'true'
 					end
 
 					if not startup and key and k.key == key then
@@ -53,9 +56,9 @@ function indicator:updateKey ( startup, key )
 					end
 				end
 
-				self.keywidgets[_]:set_markup('<span color="'..color..'">'..k.name..'</span>')
+				self.keywidgets[_]:set_markup('<span background="#222222" strikethrough="'..strike..'" color="'..color..'">'..k.name..'</span>')
 			else
-				self.keywidgets[_]:set_markup('<span>'..k.name..'</span>')
+				self.keywidgets[_]:set_markup('<span background="#222222">'..k.name..'</span>')
 			end
 		end
 	end)
@@ -153,6 +156,7 @@ end
 function indicator:update()
 	-- update layoutwidget text
 	local text = "" .. self.current.name .. ""
+
 	if self.current.color and self.current.color ~= nil then
 		local w_markup = '<span color="' .. self.current.color .. '">' .. text ..'</span>'
 		self.layoutwidget:set_markup(w_markup)
