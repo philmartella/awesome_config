@@ -329,8 +329,8 @@ kbdcfg = fleet.widget.keyboardlayoutindicator(
 		{ name = "qwerty", layout = "us", variant = nil }
 	},
 	{
-		{ name = "[1]", key = "Num_Lock", led = "Num Lock" },
-		{ name = "[A]", key = "Caps_Lock", led = "Caps Lock" }
+		{ name = " 1 ", key = "Num_Lock", led = "Num Lock" },
+		{ name = " A ", key = "Caps_Lock", led = "Caps Lock" }
 	},
 	{
 		section = bar,
@@ -381,7 +381,7 @@ timewidget = wibox.widget {
 vicious.register(timewidget.time, vicious.widgets.date, '%H:%M', 60)
 
 -- Volume control
---volumecfg = volume_control({channel="Master"})
+volumecontrol = fleet.widget.volume_control({channel="Master"})
 
 volumewidget = wibox.widget {
 	{
@@ -389,30 +389,9 @@ volumewidget = wibox.widget {
 		widget = wibox.widget.imagebox,
 	},
 	bar,
-	{
-		id = "prog",
-		max_value = 1,
-		value = 0,
-		forced_height = 20,
-		forced_width = 100,
-		paddings = 1,
-		border_width = 1,
-		margins = {
-			top = 2,
-			bottom = 2,
-		},
-		widget = wibox.widget.progressbar,
-	},
+	volumecontrol.widget,
 	layout = wibox.layout.fixed.horizontal
 }
-
-vicious.register(volumewidget.prog, vicious.widgets.volume, function(widget, args)
-	local color = { ["♫"] = "#81B7E1", ["♩"] = "#E18181" }
-
-	widget.color = color[args[2]]
-
-	return args[1]
-end, 10, "Master")
 
 -- CPU
 cpuwidget = wibox.widget {
@@ -683,7 +662,7 @@ awful.screen.connect_for_each_screen(function(s)
 		{ -- Left widgets
 			layout = wibox.layout.fixed.horizontal,
 			wibox.container.margin(s.mytaglist, 1, 1, 2, 2),
-			wibox.container.margin(s.mylayoutbox, 2, 2, 2, 2),
+			wibox.container.margin(s.mylayoutbox, 7, 7, 2, 2),
 			s.mypromptbox,
 		},
 		s.mytasklist, -- Middle widget
@@ -889,9 +868,9 @@ globalkeys = awful.util.table.join(
 	{description="show help", group="awesome"}),
 
 	-- Standard program
-	--awful.key({}, "XF86AudioRaiseVolume", function() volumecfg:up() end),
-	--awful.key({}, "XF86AudioLowerVolume", function() volumecfg:down() end),
-	--awful.key({}, "XF86AudioMute", function() volumecfg:toggle() end),
+	awful.key({}, "XF86AudioRaiseVolume", function() volumecontrol:up() end),
+	awful.key({}, "XF86AudioLowerVolume", function() volumecontrol:down() end),
+	awful.key({}, "XF86AudioMute", function() volumecontrol:toggle() end),
 
 	-- Awesome
 	awful.key({ modkey }, "Return", function () awful.spawn(terminal) end,
@@ -1001,9 +980,9 @@ clientkeys = awful.util.table.join(
 -- Bind keypad to move and resize client
 NumericPad = { "KP_End", "KP_Down", "KP_Next", "KP_Left", "KP_Begin", "KP_Right", "KP_Home", "KP_Up", "KP_Prior" }
 NumericPadMap = {
-	{-16,16,16,16}, {0,16,0,16,"down"}, {16,16,16,16},
-	{-16,0,16,0,"left"}, {0,0,0,0}, {16,0,16,0,"right"},
-	{-16,-16,16,16}, {0,-16,0,16,"up"}, {16,-16,16,16}
+	{-16,16,16,16,'left'}, {0,16,0,16,'down'}, {16,16,16,16,'right'},
+	{-16,0,16,0,'left'}, {0,0,0,0,'none'}, {16,0,16,0,'right'},
+	{-16,-16,16,16,'left'}, {0,-16,0,16,'up'}, {16,-16,16,16,'right'}
 }
 
 for i = 1, 9 do
@@ -1015,7 +994,7 @@ for i = 1, 9 do
 		elseif NumericPadMap[i][5] then
 			awful.client.swap.bydirection(NumericPadMap[i][5], c)
 		end
-	end, {description = "move client", group = "client"}),
+	end, {description = "move client "..NumericPadMap[i][5], group = "client"}),
 	awful.key({ modkey, "Shift" }, NumericPad[i],
 	function (c)
 		if not awful.client.isfixed(c) then
@@ -1025,7 +1004,7 @@ for i = 1, 9 do
 			if y > 0 then y = 0 end
 			awful.client.moveresize(x, y, NumericPadMap[i][3], NumericPadMap[i][4], c)
 		end
-	end, {description = "grow client", group = "client"}),
+	end, {description = "grow client "..NumericPadMap[i][5], group = "client"}),
 	awful.key({ modkey, "Control" }, NumericPad[i],
 	function (c)
 		if not awful.client.isfixed(c) then
@@ -1035,7 +1014,7 @@ for i = 1, 9 do
 			if y < 0 then y = 0 end
 			awful.client.moveresize(x, y, NumericPadMap[i][3] * -1, NumericPadMap[i][4] * -1, c)
 		end
-	end, {description = "shrink client", group = "client"}))
+	end, {description = "shrink client "..NumericPadMap[i][5], group = "client"}))
 end
 -- }}}
 
