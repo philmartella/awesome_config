@@ -65,6 +65,9 @@ function indicator:updateKey ( startup, key )
 end
 
 function indicator:statKeyWidget ()
+	local last = #self.keys
+	local spacing = 5
+
 	for _, k in pairs(self.keys) do
 		awful.key({}, k.key, function () end, function () self:updateKey(false, k.key) end)
 
@@ -75,11 +78,11 @@ function indicator:statKeyWidget ()
 			awful.button({ }, 2, function() self:toggleKey(k.key) end)
 		))
 
-		self.widget:add(self.keywidgets[_])
-
-		if self.dividers.keys and _ ~= #self.keys then
-			self.widget:add(self.dividers.keys)
+		if _ == last then
+			spacing = 0
 		end
+
+		self.widget:add(wibox.container.margin(self.keywidgets[_], 0, spacing, 0, 0))
 	end
 
 	self:updateKey(true)

@@ -51,6 +51,7 @@ editor = os.getenv("EDITOR") or "vim" or "vi" or "nano"
 editor_cmd = terminal .. " -e " .. editor
 lockscreen_cmd = "xlock -mode space"
 
+screenshot = "gnome-screenshot -i"
 filemanager = "nautilus" or "pcmanfm"
 browser = "chromium" or "firefox" or "opera" or "surf" or "dwb" or "netsurf"
 email = "xdg-email"
@@ -133,7 +134,9 @@ local function set_wallpaper(s)
 		if type(wallpaper) == "function" then
 			wallpaper = wallpaper(s)
 		end
-		gears.wallpaper.maximized(wallpaper, s, true)
+
+		--gears.wallpaper.maximized(wallpaper, s, true)
+		gears.wallpaper.centered(wallpaper, s, '#000000')
 	end
 end
 
@@ -269,7 +272,8 @@ mywmmenu = {
 	{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end },
 	{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
 	{ "toggle bottom wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mybotwibox}) end },
-	{ "change wallpaper", function () end },
+	{ "change wallpaper", "nitrogen" },
+	{ "take screenshot", screenshot },
 	{ "lock screen", lockscreen_cmd },
 }
 
@@ -280,7 +284,7 @@ mymainmenu = awful.menu({
 		{ "open files", filemanager },
 		{ "open browser", browser },
 		{ "send email", email },
-		{ "layout", mywmmenu },
+		{ "desktop", mywmmenu },
 		{ "awesome", myawesomemenu, beautiful.awesome_icon },
 	}
 })
@@ -330,7 +334,8 @@ kbdcfg = fleet.widget.keyboardlayoutindicator(
 	},
 	{
 		{ name = " 1 ", key = "Num_Lock", led = "Num Lock" },
-		{ name = " A ", key = "Caps_Lock", led = "Caps Lock" }
+		{ name = " A ", key = "Caps_Lock", led = "Caps Lock" },
+		{ name = " ⏎ ", key = "Return" }
 	},
 	{
 		section = bar,
@@ -871,6 +876,8 @@ globalkeys = awful.util.table.join(
 	awful.key({}, "XF86AudioRaiseVolume", function() volumecontrol:up() end),
 	awful.key({}, "XF86AudioLowerVolume", function() volumecontrol:down() end),
 	awful.key({}, "XF86AudioMute", function() volumecontrol:toggle() end),
+	awful.key({}, "XF86ScreenSaver", function () awful.spawn(lockscreen_cmd) end),
+	awful.key({}, "Print", function () awful.spawn(screenshot) end),
 
 	-- Awesome
 	awful.key({ modkey }, "Return", function () awful.spawn(terminal) end,
@@ -987,17 +994,17 @@ NumericPadMap = {
 
 for i = 1, 9 do
 	clientkeys = awful.util.table.join(clientkeys,
-	awful.key({ modkey }, NumericPad[i],
-	function (c)
+
+	awful.key({ modkey }, NumericPad[i], function (c)
 		if awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating then
 			awful.client.moveresize(NumericPadMap[i][1], NumericPadMap[i][2], 0, 0, c)
 		elseif NumericPadMap[i][5] then
 			awful.client.swap.bydirection(NumericPadMap[i][5], c)
 		end
 	end, {description = "move client "..NumericPadMap[i][5], group = "client"}),
-	awful.key({ modkey, "Shift" }, NumericPad[i],
-	function (c)
-		if not awful.client.isfixed(c) then
+
+	awful.key({ modkey, "Shift" }, NumericPad[i], function (c)
+		if not c.is_fixed(c) then
 			local x = NumericPadMap[i][1]
 			local y = NumericPadMap[i][2]
 			if x > 0 then x = 0 end
@@ -1005,9 +1012,9 @@ for i = 1, 9 do
 			awful.client.moveresize(x, y, NumericPadMap[i][3], NumericPadMap[i][4], c)
 		end
 	end, {description = "grow client "..NumericPadMap[i][5], group = "client"}),
-	awful.key({ modkey, "Control" }, NumericPad[i],
-	function (c)
-		if not awful.client.isfixed(c) then
+
+	awful.key({ modkey, "Control" }, NumericPad[i], function (c)
+		if not c.is_fixed(c) then
 			local x = NumericPadMap[i][1] * -1
 			local y = NumericPadMap[i][2] * -1
 			if x < 0 then x = 0 end
@@ -1115,7 +1122,6 @@ screen.connect_signal("arrange", function ()
 	if #clients > 0 then
 		for _, c in pairs(clients) do
 			if c.maximized_horizontal == true and c.maximized_vertical == true then
-				c.titlebars_enabled = false
 				c.border_width = 0
 			else
 				c.border_width = beautiful.border_width
@@ -1154,8 +1160,7 @@ client.connect_signal("request::titlebars", function(c)
 		end)
 	)
 
-	awful.titlebar(c, {size = 18}) : setup
-	{
+	awful.titlebar(c, {size = 18}) : setup {
 		layout = wibox.layout.align.horizontal,
 		{ -- Left
 			layout = wibox.layout.fixed.horizontal,
