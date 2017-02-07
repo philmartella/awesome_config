@@ -338,8 +338,7 @@ kbdcfg = fleet.widget.keyboardlayoutindicator(
 		{ name = " ⏎ ", key = "Return" }
 	},
 	{
-		section = bar,
-		keys = spr_small_empty
+		section = bar
 	}
 )
 
