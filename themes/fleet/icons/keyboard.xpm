@@ -3,7 +3,8 @@ static char *keyboard[] = {
 /* columns rows colors chars-per-pixel */
 "18 18 3 1 ",
 "  c None",
-"# c #9981E1",
+/*"# c #9981E1",*/
+"# c #81B7E1",
 ". c black",
 /* pixels */
 "                  ",

@@ -128,7 +128,6 @@ end
 local function set_wallpaper_beautiful (s)
 	local wallpaper = beautiful.wallpaper
 
-	-- If wallpaper is a function, call it with the screen
 	if type(wallpaper) == "function" then
 		wallpaper = wallpaper(s)
 	end
@@ -149,9 +148,21 @@ local function set_wallpaper(s)
 	end)
 end
 
+local function wrap_widget_vmargin (widget)
+	return wibox.container.margin(widget, 2, 2, 4, 4)
+end
+
+local function wrap_widget_hmargin (widget)
+	return wibox.container.margin(widget, 4, 4, 2, 2)
+end
+
+local function wrap_widget (widget)
+	local bg = beautiful.widget_bg or '#000000'
+	return wrap_widget_vmargin(wibox.container.background(wrap_widget_hmargin(widget), bg))
+end
+
 function get_clientbuttons ( c, s )
 	local clientbuttons_layout = wibox.layout.fixed.horizontal()
-	local clientname_layout = wibox.layout.constraint()
 	local myclienticon = nil
 	local myclientname = wibox.widget.textbox()
 	local button_float = nil
@@ -237,27 +248,15 @@ function get_clientbuttons ( c, s )
 	end
 
 	if s then
-		local clienticon_margin = wibox.layout.margin(myclienticon, 0, 0, 0, 0)
-		local clienttitle_margin = wibox.layout.margin(myclientname, 0, 0, 2, 2)
-
-		clientname_layout:set_strategy("max")
-		clientname_layout:set_width(256)
-		clientname_layout:set_widget(clienttitle_margin)
-
-		clientbuttons_layout:add(spr_small_empty)
-		clientbuttons_layout:add(clienticon_margin)
-		clientbuttons_layout:add(spr_small_empty)
-		clientbuttons_layout:add(clientname_layout)
+		clientbuttons_layout:add(wrap_widget_hmargin(myclienticon))
+		clientbuttons_layout:add(wrap_widget_hmargin(myclientname))
 		clientbuttons_layout:add(bar)
-		clientbuttons_layout:add(button_float)
-		clientbuttons_layout:add(spr_small_empty)
-		clientbuttons_layout:add(button_maximize)
-		clientbuttons_layout:add(spr_small_empty)
-		clientbuttons_layout:add(button_sticky)
-		clientbuttons_layout:add(spr_small_empty)
-		clientbuttons_layout:add(button_ontop)
+		clientbuttons_layout:add(wrap_widget_hmargin(button_float))
+		clientbuttons_layout:add(wrap_widget_hmargin(button_maximize))
+		clientbuttons_layout:add(wrap_widget_hmargin(button_sticky))
+		clientbuttons_layout:add(wrap_widget_hmargin(button_ontop))
 		clientbuttons_layout:add(bar)
-		clientbuttons_layout:add(button_close)
+		clientbuttons_layout:add(wrap_widget_hmargin(button_close))
 	end
 
 	return clientbuttons_layout
@@ -328,16 +327,13 @@ menubar.geometry = { y = 0, height = 22 }
 
 -- {{{ Wibar Widgets
 -- Separators
-spr_small_empty = wibox.widget.imagebox()
-spr_small_empty:set_image(beautiful.spr_small_empty)
-
 bar = wibox.widget.imagebox()
 bar:set_image(beautiful.bar)
 
 -- Keyboard map indicator and switcher
 kbdlayout = fleet.widget.keyboard_layout_control({
-	{ name = "cm", layout = "us", variant = "colemak", color = "#81B7E1" },
-	{ name = "dv", layout = "us", variant = "dvorak", color = "#E18181" },
+	{ name = "cm", layout = "us", variant = "colemak" },
+	{ name = "dv", layout = "us", variant = "dvorak" },
 	{ name = "us", layout = "us", variant = nil }
 })
 
@@ -677,45 +673,48 @@ awful.screen.connect_for_each_screen(function(s)
 
 	-- Add widgets to the wibox
 	s.mywibox:setup {
-		layout = wibox.layout.align.horizontal,
 		{ -- Left widgets
-			layout = wibox.layout.fixed.horizontal,
-			wibox.container.margin(s.mytaglist, 1, 1, 2, 2),
-			wibox.container.margin(s.mylayoutbox, 7, 7, 2, 2),
-			s.mypromptbox,
+			wrap_widget_hmargin(s.mytaglist),
+			wrap_widget_hmargin(s.mylayoutbox),
+			wrap_widget_hmargin(s.mypromptbox),
+			layout = wibox.layout.fixed.horizontal
 		},
-		s.mytasklist, -- Middle widget
+		{ -- Middle widgets
+			wrap_widget_hmargin(s.mytasklist), -- Middle widget
+			layout = wibox.layout.fixed.horizontal
+		},
 		{ -- Right widgets
-			layout = wibox.layout.fixed.horizontal,
-			wibox.container.margin(get_clientbuttons(nil, s), 4, 4, 2, 2),
+			get_clientbuttons(nil, s),
+			layout = wibox.layout.fixed.horizontal
 		},
+		layout = wibox.layout.align.horizontal
 	}
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 32, ontop = true, bg = "transparent", screen = s })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 30, ontop = true, bg = "transparent", screen = s })
 
 		s.mybotwibox:setup {
-			layout = wibox.layout.align.horizontal,
 			{ -- Left widgets
-				layout = wibox.layout.fixed.horizontal,
-				wibox.container.margin(wibox.container.background(wibox.container.margin(mylauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(mysesslauncher, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(keyboardwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(volumewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(wibox.widget.systray(), 5, 5, 0, 0), "#000000"), 2, 2, 5, 5),
+				wrap_widget(mylauncher),
+				wrap_widget(mysesslauncher),
+				wrap_widget(keyboardwidget),
+				wrap_widget(volumewidget),
+				wrap_widget_vmargin(wibox.widget.systray()),
+				layout = wibox.layout.fixed.horizontal
 			},
 			{ -- Middle widgets
-				layout = wibox.layout.fixed.horizontal,
+				layout = wibox.layout.fixed.horizontal
 			},
 			{ -- Right widgets
-				layout = wibox.layout.fixed.horizontal,
-				wibox.container.margin(wibox.container.background(wibox.container.margin(cpuwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(memwidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(diowidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(datewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
-				wibox.container.margin(wibox.container.background(wibox.container.margin(timewidget, 5, 5, 2, 2), "#333333"), 2, 2, 5, 5),
+				wrap_widget(cpuwidget),
+				wrap_widget(memwidget),
+				wrap_widget(diowidget),
+				wrap_widget(datewidget),
+				wrap_widget(timewidget),
+				layout = wibox.layout.fixed.horizontal
 			},
+			layout = wibox.layout.align.horizontal
 		}
 	end
 end)
@@ -1069,6 +1068,7 @@ awful.rules.rules = {
 	{ rule_any = {
 			instance = {
 				"pavucontrol",
+				"gnome",
 				"DTA",  -- Firefox addon DownThemAll.
 				"copyq",  -- Includes session name in class.
 			},
@@ -1176,7 +1176,7 @@ client.connect_signal("request::titlebars", function(c)
 		end)
 	)
 
-	awful.titlebar(c, {size = 18}) : setup {
+	awful.titlebar(c, {size = 22}) : setup {
 		layout = wibox.layout.align.horizontal,
 		{ -- Left
 			layout = wibox.layout.fixed.horizontal,
@@ -1189,16 +1189,13 @@ client.connect_signal("request::titlebars", function(c)
 			{align = "left", widget = awful.titlebar.widget.titlewidget(c) },
 		},
 		{ -- Right
-			layout = wibox.layout.fixed.horizontal(),
-			awful.titlebar.widget.floatingbutton(c),
-			spr_small_empty,
-			awful.titlebar.widget.maximizedbutton(c),
-			spr_small_empty,
-			awful.titlebar.widget.stickybutton(c),
-			spr_small_empty,
-			awful.titlebar.widget.ontopbutton(c),
+			wrap_widget_hmargin(awful.titlebar.widget.floatingbutton(c)),
+			wrap_widget_hmargin(awful.titlebar.widget.maximizedbutton(c)),
+			wrap_widget_hmargin(awful.titlebar.widget.stickybutton(c)),
+			wrap_widget_hmargin(awful.titlebar.widget.ontopbutton(c)),
 			bar,
-			awful.titlebar.widget.closebutton(c),
+			wrap_widget_hmargin(awful.titlebar.widget.closebutton(c)),
+			layout = wibox.layout.fixed.horizontal()
 		},
 	}
 end)

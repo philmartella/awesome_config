@@ -28,7 +28,7 @@ theme.border_focus                  = "#0099CCFF"
 theme.textbox_widget_margin_top     = 1
 theme.awful_widget_height           = 16
 theme.awful_widget_margin_top       = 2
-theme.widget_bg                     = theme.icon_dir .. "/bg_focus_noline.xpm"
+theme.widget_bg                     = '#333333'
 -- }}}
 
 -- {{{ Menu
