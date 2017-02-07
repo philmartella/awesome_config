@@ -1086,6 +1086,7 @@ awful.rules.rules = {
 	-- No titlebar clients
 	{ rule_any = {
 			instance = {
+				"eog",
 				"gnome",
 				"gpk",
 			},
