@@ -956,8 +956,6 @@ for i = 1, 9 do
 	)
 end
 
--- Set keys
-root.keys(globalkeys)
 -- }}}
 
 -- {{{ Client key bindings
@@ -1070,6 +1068,7 @@ awful.rules.rules = {
 	-- Floating clients.
 	{ rule_any = {
 			instance = {
+				"pavucontrol",
 				"DTA",  -- Firefox addon DownThemAll.
 				"copyq",  -- Includes session name in class.
 			},
@@ -1095,7 +1094,8 @@ awful.rules.rules = {
 			}
 		},
 		properties = {
-			floating = true
+			floating = true,
+			placement = awful.placement.centered
 		},
 	},
 
@@ -1116,9 +1116,6 @@ awful.rules.rules = {
 				"MessageWin",
 				"Gtk-recordMyDesktop",
 				"Wallp"
-			},
-			name = {
-				"Event Tester",
 			},
 			role = {
 				"AlarmWindow",
@@ -1219,5 +1216,6 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- }}}
 
 -- {{{ Startup
+root.keys(globalkeys)
 set_wallpaper()
 -- }}}
