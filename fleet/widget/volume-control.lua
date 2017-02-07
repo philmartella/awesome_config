@@ -56,7 +56,7 @@ function vcontrol.new(args)
     sw.widget = wibox.widget({
 			max_value = 101,
 			value = 0,
-			forced_height = 20,
+			forced_height = 16,
 			forced_width = 80,
 			paddings = 1,
 			border_width = 1,
