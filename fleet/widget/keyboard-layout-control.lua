@@ -1,7 +1,6 @@
 local pairs = pairs
 local awful = require("awful")
 local wibox = require("wibox")
-local naughty = require("naughty")
 local beautiful = require("beautiful")
 
 -- Keyboard Layout Switcher
@@ -14,101 +13,13 @@ indicator.wmt.__index = indicator
 
 local notification_id = 0
 
-function indicator:toggleKey ( key )
-	awful.spawn.easy_async("xdotool key "..key, function (out, err, reason, code)
-		if 'exit' == reason and 0 == code then
-			self:updateKey(false, key)
-		end
-	end)
-end
-
-function indicator:updateKey ( startup, key )
-	awful.spawn.easy_async("xset -q", function (out, err, reason, code)
-		for _, k in pairs(self.keys) do
-			if k.led then
-				local color = '#FF0000FF'
-				local strike = 'false'
-				local led_status = string.match(out, k.led..":([^\\t{0}]+)"):gsub("^%s*(.-)%s*$", "%1")
-
-				if led_status then
-					if 'on' == led_status then
-						color = '#8AE181FF'
-						strike = 'false'
-					elseif 'off' == led_status then
-						color = '#777777FF'
-						strike = 'true'
-					end
-
-					if not startup and key and k.key == key then
-						notification_id = naughty.notify({
-							text = tostring(led_status),
-							title = tostring(k.led),
-							icon = beautiful.icon_dir..'/key_'..k.key..'_'..led_status..'.png',
-							position = "bottom_left",
-							ontop = true,
-							fg = color,
-							bg = "#000000FF",
-							border_width = 2,
-							border_color = color,
-							preset = naughty.config.presets.low,
-							replaces_id = notification_id,
-						}).id
-					end
-				end
-
-				self.keywidgets[_]:set_markup('<span background="#222222" strikethrough="'..strike..'" color="'..color..'">'..k.name..'</span>')
-			else
-				self.keywidgets[_]:set_markup('<span background="#222222">'..k.name..'</span>')
-			end
-		end
-	end)
-end
-
-function indicator:statKeyWidget ()
-	local last = #self.keys
-	local spacing = 5
-
-	for _, k in pairs(self.keys) do
-		awful.key({}, k.key, function () end, function () self:updateKey(false, k.key) end)
-
-		self.keywidgets[_] = wibox.widget.textbox(k.name)
-
-		self.keywidgets[_]:buttons(awful.util.table.join(
-			awful.button({ }, 1, function() self:toggleKey(k.key) end),
-			awful.button({ }, 2, function() self:toggleKey(k.key) end)
-		))
-
-		if _ == last then
-			spacing = 0
-		end
-
-		self.widget:add(wibox.container.margin(self.keywidgets[_], 0, spacing, 0, 0))
-	end
-
-	self:updateKey(true)
-end
-
-function indicator:set_layouts (layouts)
-	self.layouts = layouts or {}
-end
-
-function indicator:set_keys (keys)
-	self.keys = keys or {}
-end
-
-function indicator:set_dividers (dividers)
-	self.dividers = dividers or {}
-end
-
-function indicator.new ( layouts, keys, dividers )
+function indicator.new ( layouts )
 	local sw = setmetatable({}, indicator.wmt)
 
 	sw.keywidgets = {}
 
 	sw.cmd = "setxkbmap"
 	sw.layouts = layouts or {}
-	sw.keys = keys or {}
-	sw.dividers = dividers or {}
 
 	sw.index = 1
 	sw.current = nil
@@ -126,15 +37,9 @@ function indicator.new ( layouts, keys, dividers )
 	))
 
 	sw.widget:add(sw.layoutwidget)
-
-	if sw.dividers.section then
-		sw.widget:add(sw.dividers.section)
-	end
-
-	sw:statKeyWidget()
 	sw:set(sw.index)
 
-	return sw.widget
+	return sw
 end
 
 function indicator:set(i)

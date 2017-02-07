@@ -335,21 +335,26 @@ bar = wibox.widget.imagebox()
 bar:set_image(beautiful.bar)
 
 -- Keyboard map indicator and switcher
-kbdcfg = fleet.widget.keyboardlayoutindicator(
-	{
-		{ name = "colemak", layout = "us", variant = "colemak", color = "#81B7E1" },
-		{ name = "dvorak", layout = "us", variant = "dvorak", color = "#E18181" },
-		{ name = "qwerty", layout = "us", variant = nil }
-	},
-	{
-		{ name = " 1 ", key = "Num_Lock", led = "Num Lock" },
-		{ name = " A ", key = "Caps_Lock", led = "Caps Lock" },
-		{ name = " ⏎ ", key = "Return" }
-	},
-	{
-		section = bar
+kbdlayout = fleet.widget.keyboard_layout_control({
+	{ name = "cm", layout = "us", variant = "colemak", color = "#81B7E1" },
+	{ name = "dv", layout = "us", variant = "dvorak", color = "#E18181" },
+	{ name = "us", layout = "us", variant = nil }
+})
+
+kbdleds = fleet.widget.keyboard_key_control({
+	led_on = '#8AE181',
+	position = 'bottom_left',
+	keys = {
+		{ name = ' 1 ', key = 'Num_Lock', led = 'Num Lock' },
+		{ name = ' A ', key = 'Caps_Lock', led = 'Caps Lock' }
 	}
-)
+})
+
+kbdkeys = fleet.widget.keyboard_key_control({
+	keys = {
+		{ name = ' ⏎ ', key = 'Return' }
+	}
+})
 
 keyboardwidget = wibox.widget {
 	{
@@ -357,7 +362,11 @@ keyboardwidget = wibox.widget {
 		widget = wibox.widget.imagebox,
 	},
 	bar,
-	kbdcfg,
+	kbdlayout.widget,
+	bar,
+	kbdleds.widget,
+	bar,
+	kbdkeys.widget,
 	layout = wibox.layout.fixed.horizontal
 }
 
@@ -882,6 +891,8 @@ globalkeys = awful.util.table.join(
 	awful.key({}, "XF86AudioLowerVolume", function() volumecontrol:down() end),
 	awful.key({}, "XF86AudioMute", function() volumecontrol:toggle() end),
 	awful.key({}, "XF86ScreenSaver", function () awful.spawn(lockscreen_cmd) end),
+	awful.key({}, "Num_Lock", function() kbdleds:update_key('Num_Lock') end),
+	awful.key({}, "Caps_Lock", function() kbdleds:update_key('Caps_Lock') end),
 	awful.key({}, "Print", function () awful.spawn(screenshot) end),
 
 	-- Awesome
