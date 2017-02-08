@@ -1,6 +1,3 @@
----------------------------------------------------------------------------
---- Clientbox widget module for fleet.
----------------------------------------------------------------------------
 
 -- Grab environment we need
 local capi = { screen = screen,
@@ -19,11 +16,15 @@ local function get_screen(s)
     return s and screen[s]
 end
 
-local clientbox = { mt = {} }
+local tasklist = { mt = {} }
 
 local instances
 
-local function clientbox_label(c, args, tb)
+
+-- Public structures
+tasklist.filter = {}
+
+local function tasklist_label(c, args, tb)
     if not args then args = {} end
     local theme = beautiful.get()
     local align = args.align or theme.tasklist_align or "left"
@@ -52,15 +53,47 @@ local function clientbox_label(c, args, tb)
     local shape_border_width = args.shape_border_width or theme.tasklist_shape_border_width
     local shape_border_color = args.shape_border_color or theme.tasklist_shape_border_color
 
+    -- symbol to use to indicate certain client properties
+    local sticky = args.sticky or theme.tasklist_sticky or "▪"
+    local ontop = args.ontop or theme.tasklist_ontop or '⌃'
+    local above = args.above or theme.tasklist_above or '▴'
+    local below = args.below or theme.tasklist_below or '▾'
+    local floating = args.floating or theme.tasklist_floating or '✈'
+    local maximized = args.maximized or theme.tasklist_maximized or '<b>+</b>'
+    local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
+    local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
+
     tb:set_align(align)
 
-    name = name .. (util.escape(c.name) or util.escape("<untitled>"))
+    if not theme.tasklist_plain_task_name then
+        if c.sticky then name = name .. sticky end
+
+        if c.ontop then name = name .. ontop
+        elseif c.above then name = name .. above
+        elseif c.below then name = name .. below end
+
+        if c.maximized then
+            name = name .. maximized
+        else
+            if c.maximized_horizontal then name = name .. maximized_horizontal end
+            if c.maximized_vertical then name = name .. maximized_vertical end
+            if c.floating then name = name .. floating end
+        end
+    end
+
+    if c.minimized then
+        name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
+    else
+        name = name .. (util.escape(c.name) or util.escape("<untitled>"))
+    end
 
     local focused = capi.client.focus == c
     -- Handle transient_for: the first parent that does not skip the taskbar
     -- is considered to be focused, if the real client has skip_taskbar.
     if not focused and capi.client.focus and capi.client.focus.skip_taskbar
-        and capi.client.focus:get_transient_for_matching(function(cl) return not cl.skip_taskbar end) == c then
+        and capi.client.focus:get_transient_for_matching(function(cl)
+                                                             return not cl.skip_taskbar
+                                                         end) == c then
         focused = true
     end
 
@@ -98,12 +131,28 @@ local function clientbox_label(c, args, tb)
         if args.shape_border_color_urgent or theme.tasklist_shape_border_color_urgent then
             shape_border_color = args.shape_border_color_urgent or theme.tasklist_shape_border_color_urgent
         end
+    elseif c.minimized then
+        bg = bg_minimize
+        text = text .. "<span color='"..fg_minimize.."'>"..name.."</span>"
+        bg_image = bg_image_minimize
+        font = font_minimized
+
+        if args.shape_minimized or theme.tasklist_shape_minimized then
+            shape = args.shape_minimized or theme.tasklist_shape_minimized
+        end
+
+        if args.shape_border_width_minimized or theme.tasklist_shape_border_width_minimized then
+            shape_border_width = args.shape_border_width_minimized or theme.tasklist_shape_border_width_minimized
+        end
+
+        if args.shape_border_color_minimized or theme.tasklist_shape_border_color_minimized then
+            shape_border_color = args.shape_border_color_minimized or theme.tasklist_shape_border_color_minimized
+        end
     else
         bg = bg_normal
         text = text .. "<span color='"..fg_normal.."'>"..name.."</span>"
         bg_image = bg_image_normal
     end
-
     tb:set_font(font)
 
     local other_args = {
@@ -268,9 +317,85 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     return w
 end
 
+--- Filtering function to include all clients.
+-- @return true
+function tasklist.filter.allscreen()
+    return true
+end
+
+--- Filtering function to include the clients from all tags on the screen.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @return true if c is on screen, false otherwise
+function tasklist.filter.alltags(c, screen)
+    -- Only print client on the same screen as this widget
+    return get_screen(c.screen) == get_screen(screen)
+end
+
+--- Filtering function to include only the clients from currently selected tags.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @return true if c is in a selected tag on screen, false otherwise
+function tasklist.filter.currenttags(c, screen)
+    screen = get_screen(screen)
+    -- Only print client on the same screen as this widget
+    if get_screen(c.screen) ~= screen then return false end
+    -- Include sticky client too
+    if c.sticky then return true end
+    local tags = screen.tags
+    for _, t in ipairs(tags) do
+        if t.selected then
+            local ctags = c:tags()
+            for _, v in ipairs(ctags) do
+                if v == t then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+--- Filtering function to include only the minimized clients from currently selected tags.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @return true if c is in a selected tag on screen and is minimized, false otherwise
+function tasklist.filter.minimizedcurrenttags(c, screen)
+    screen = get_screen(screen)
+    -- Only print client on the same screen as this widget
+    if get_screen(c.screen) ~= screen then return false end
+    -- Check client is minimized
+    if not c.minimized then return false end
+    -- Include sticky client
+    if c.sticky then return true end
+    local tags = screen.tags
+    for _, t in ipairs(tags) do
+        -- Select only minimized clients
+        if t.selected then
+            local ctags = c:tags()
+            for _, v in ipairs(ctags) do
+                if v == t then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+--- Filtering function to include only the currently focused client.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @return true if c is focused on screen, false otherwise
+function tasklist.filter.focused(c, screen)
+    -- Only print client on the same screen as this widget
+    return get_screen(c.screen) == get_screen(screen) and capi.client.focus == c
+end
+
 function tasklist.mt:__call(...)
     return tasklist.new(...)
 end
 
 return setmetatable(tasklist, tasklist.mt)
 
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

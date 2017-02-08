@@ -565,31 +565,123 @@ awful.screen.connect_for_each_screen(function(s)
 	s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons, {spacing = 4})
 
 	-- Create a tasklist widget
-	s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {align = "right"})
+	--s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {align = "right"})
 
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, screen = s })
 
 	-- Client control
-	s.clientcontrols = fleet.widget.client_control(s, {})
+	s.clientcontrols = fleet.widget.client_control(s, {
+		{
+			id = 'closebutton',
+			widget = wibox.widget.imagebox(beautiful.none_normal),
+			update = function (w, c)
+				w:set_image(theme.titlebar_close_button_normal)
+
+        w:buttons(awful.button({}, 1, nil, function () c:kill() end))
+			end
+		},
+		{
+			id = 'floatingbutton',
+			widget = wibox.widget.imagebox(beautiful.none_normal),
+			update = function (w, c, s)
+				local image = fleet.widget.client_control.button_img('floating', c)
+
+				w:set_image(image)
+
+        w:buttons(awful.button({}, 1, nil, function () awful.client.floating.toggle(c) end))
+			end
+		},
+		{
+			id = 'maximizedbutton',
+			widget = wibox.widget.imagebox(beautiful.none_normal),
+			update = function (w, c)
+				local state = c.maximized_horizontal or c.maximized_vertical
+				local image = fleet.widget.client_control.button_img('maximized', c)
+
+				w:set_image(image)
+
+        w:buttons(awful.button({}, 1, nil, function ()
+					c.maximized_horizontal = not state
+					c.maximized_vertical = not state
+				end))
+			end
+		},
+		{
+			id = 'minimizebutton',
+			widget = wibox.widget.imagebox(beautiful.none_normal),
+			update = function (w, c)
+				local image = fleet.widget.client_control.button_img('minimized', c)
+
+				w:set_image(image)
+
+        w:buttons(awful.button({}, 1, nil, function () c.minimized = not c.minimized end))
+			end
+		},
+		{
+			id = 'ontopbutton',
+			widget = wibox.widget.imagebox(beautiful.none_normal),
+			update = function (w, c)
+				local image = fleet.widget.client_control.button_img('ontop', c)
+
+				w:set_image(image)
+
+        w:buttons(awful.button({}, 1, nil, function () c.ontop = not c.ontop end))
+			end
+		},
+		{
+			id = 'stickybutton',
+			widget = wibox.widget.imagebox(beautiful.none_normal),
+			update = function (w, c)
+				local image = fleet.widget.client_control.button_img('sticky', c)
+
+				w:set_image(image)
+
+        w:buttons(awful.button({}, 1, nil, function () c.sticky = not c.sticky end))
+			end
+		},
+		{
+			id = 'title',
+			widget = wibox.widget.textbox('<span color="red">~</span>'),
+			update = function (w, c)
+				local name = (awful.util.escape(c.name) or awful.util.escape("<untitled>"))
+				local color = '#FFFFFF'
+
+				w:set_markup('<span foreground="'..color..'">'..name..'</span>')
+				w:set_align("right")
+				w:set_ellipsize("right")
+
+				--w:set_wrap("WORD")
+				--w:set_forced_width(200)
+			end
+		},
+		{
+			id = 'icon',
+			widget = wibox.widget.imagebox(beautiful.application_icon),
+			update = function (w, c)
+				w:set_image(beautiful.application_icon)
+			end
+		},
+	})
+
 	s.myclientcontrol = wibox.widget {
 		{
-			s.clientcontrols.widget.icon(),
-			s.clientcontrols.widget.title(),
+			s.clientcontrols.widget.icon,
+			s.clientcontrols.widget.title,
 			spacing = 8,
 			layout = wibox.layout.fixed.horizontal
 		},
 		bar,
 		{
-			s.clientcontrols.widget.floatingbutton(),
-			s.clientcontrols.widget.maximizedbutton(),
-			s.clientcontrols.widget.stickybutton(),
-			s.clientcontrols.widget.ontopbutton(),
+			s.clientcontrols.widget.floatingbutton,
+			s.clientcontrols.widget.maximizedbutton,
+			s.clientcontrols.widget.stickybutton,
+			s.clientcontrols.widget.ontopbutton,
 			spacing = 8,
 			layout = wibox.layout.fixed.horizontal
 		},
 		bar,
-		s.clientcontrols.widget.closebutton(),
+		s.clientcontrols.widget.closebutton,
 		layout = wibox.layout.fixed.horizontal
 	}
 
@@ -601,10 +693,11 @@ awful.screen.connect_for_each_screen(function(s)
 			wrap_widget_hmargin(s.mypromptbox),
 			layout = wibox.layout.fixed.horizontal
 		},
-		{ -- Middle widgets
-			wrap_widget_hmargin(s.mytasklist), -- Middle widget
-			layout = wibox.layout.fixed.horizontal
-		},
+		nil,
+		--{ -- Middle widgets
+			--wrap_widget_hmargin(s.mytasklist), -- Middle widget
+			--layout = wibox.layout.fixed.horizontal
+		--},
 		wrap_widget_hmargin(s.myclientcontrol),
 		layout = wibox.layout.align.horizontal
 	}
