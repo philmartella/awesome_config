@@ -8,7 +8,7 @@ theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
 
 -- {{{ Fonts & Colors
 theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/wallpaper.png"
-theme.font                          = "sans 10"
+theme.font                          = "Verdana 10"
 theme.fg_normal                     = "#FFFFFFFF"
 theme.bg_normal                     = "#000000AA"
 theme.fg_focus                      = "#0099CCFF"
@@ -155,7 +155,7 @@ theme.titlebar_maximized_button_normal_active   = theme.titlebar_path .. "maximi
 theme.titlebar_maximized_button_focus_inactive  = theme.titlebar_path .. "maximized_focus_inactive.xpm"
 theme.titlebar_maximized_button_normal_inactive = theme.titlebar_path .. "maximized_normal_inactive.xpm"
 
-theme.none_normal 									=	theme.titlebar_path .. "none_normal.xpm"
+theme.none_normal                               =	theme.titlebar_path .. "none_normal.xpm"
 -- }}}
 
 return theme

@@ -160,107 +160,6 @@ local function wrap_widget (widget)
 	local bg = beautiful.widget_bg or '#000000'
 	return wrap_widget_vmargin(wibox.container.background(wrap_widget_hmargin(widget), bg))
 end
-
-function get_clientbuttons ( c, s )
-	local clientbuttons_layout = wibox.layout.fixed.horizontal()
-	local myclienticon = nil
-	local myclientname = wibox.widget.textbox()
-	local button_float = nil
-	local button_maximize = nil
-	local button_sticky = nil
-	local button_ontop = nil
-	local button_close = nil
-
-	if c and s and s == c.screen then
-		if ( c.name ) then
-			myclientname = awful.titlebar.widget.titlewidget(c)
-		elseif ( c.class ) then
-			myclientname:set_text(c.class)
-		else
-			myclientname:set_markup("<i>&lt;application&gt;</i>")
-		end
-
-		myclientname:set_align("right")
-		myclientname:set_ellipsize("middle")
-		myclientname:set_wrap("WORD")
-
-		myclientname:buttons(awful.util.table.join(
-		awful.button({ }, 1, function ()
-			--[[
-			if c == client.focus then
-				c.minimized = true
-			else
-				c.minimized = false
-				if not c:isvisible() then
-					awful.tag.viewonly(c:tags()[1])
-				end
-				client.focus = c
-				c:raise()
-			end
-			--]]
-		end),
-		awful.button({ }, 3, function ()
-			if instance then
-				instance:hide()
-				instance = nil
-			else
-				instance = awful.menu.clients({ width=300 })
-			end
-		end)
-		))
-
-		clientbuttons_layout:buttons(awful.util.table.join(
-			awful.button({ }, 4, function ()
-				awful.client.focus.byidx(1)
-				if client.focus then client.focus:raise() end
-			end),
-			awful.button({ }, 5, function ()
-				awful.client.focus.byidx(-1)
-				if client.focus then client.focus:raise() end
-			end)
-		))
-
-		if ( c.icon ) then
-			myclienticon = awful.titlebar.widget.iconwidget(c)
-		else
-			myclienticon = wibox.widget.imagebox()
-			myclienticon:set_image(beautiful.application_icon)
-		end
-
-		button_float = awful.titlebar.widget.floatingbutton(c)
-		button_maximize = awful.titlebar.widget.maximizedbutton(c)
-		button_sticky = awful.titlebar.widget.stickybutton(c)
-		button_ontop = awful.titlebar.widget.ontopbutton(c)
-		button_close = awful.titlebar.widget.closebutton(c)
-	elseif s then
-		myclientname:set_markup('<span foreground="red">~</span>')
-		myclienticon = wibox.widget.imagebox()
-		myclienticon:set_image(beautiful.application_icon)
-
-		local nonebutton = wibox.widget.imagebox()
-		nonebutton:set_image(beautiful.none_normal)
-
-		button_float = nonebutton
-		button_maximize = nonebutton
-		button_sticky = nonebutton
-		button_ontop = nonebutton
-		button_close = nonebutton
-	end
-
-	if s then
-		clientbuttons_layout:add(wrap_widget_hmargin(myclienticon))
-		clientbuttons_layout:add(wrap_widget_hmargin(myclientname))
-		clientbuttons_layout:add(bar)
-		clientbuttons_layout:add(wrap_widget_hmargin(button_float))
-		clientbuttons_layout:add(wrap_widget_hmargin(button_maximize))
-		clientbuttons_layout:add(wrap_widget_hmargin(button_sticky))
-		clientbuttons_layout:add(wrap_widget_hmargin(button_ontop))
-		clientbuttons_layout:add(bar)
-		clientbuttons_layout:add(wrap_widget_hmargin(button_close))
-	end
-
-	return clientbuttons_layout
-end
 -- }}}
 
 -- {{{ Menu
@@ -671,6 +570,29 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, screen = s })
 
+	-- Client control
+	s.clientcontrols = fleet.widget.client_control(s, {})
+	s.myclientcontrol = wibox.widget {
+		{
+			s.clientcontrols.widget.icon(),
+			s.clientcontrols.widget.title(),
+			spacing = 8,
+			layout = wibox.layout.fixed.horizontal
+		},
+		bar,
+		{
+			s.clientcontrols.widget.floatingbutton(),
+			s.clientcontrols.widget.maximizedbutton(),
+			s.clientcontrols.widget.stickybutton(),
+			s.clientcontrols.widget.ontopbutton(),
+			spacing = 8,
+			layout = wibox.layout.fixed.horizontal
+		},
+		bar,
+		s.clientcontrols.widget.closebutton(),
+		layout = wibox.layout.fixed.horizontal
+	}
+
 	-- Add widgets to the wibox
 	s.mywibox:setup {
 		{ -- Left widgets
@@ -683,10 +605,7 @@ awful.screen.connect_for_each_screen(function(s)
 			wrap_widget_hmargin(s.mytasklist), -- Middle widget
 			layout = wibox.layout.fixed.horizontal
 		},
-		{ -- Right widgets
-			get_clientbuttons(nil, s),
-			layout = wibox.layout.fixed.horizontal
-		},
+		wrap_widget_hmargin(s.myclientcontrol),
 		layout = wibox.layout.align.horizontal
 	}
 
@@ -1158,6 +1077,7 @@ client.connect_signal("manage", function (c)
 		-- Prevent clients from being unreachable after screen count changes.
 		awful.placement.no_offscreen(c)
 	end
+
 end)
 
 -- Add a titlebar if titlebars_enabled is set to true in the rules.
@@ -1176,8 +1096,7 @@ client.connect_signal("request::titlebars", function(c)
 		end)
 	)
 
-	awful.titlebar(c, {size = 22}) : setup {
-		layout = wibox.layout.align.horizontal,
+	awful.titlebar(c, {size = 18}) : setup {
 		{ -- Left
 			layout = wibox.layout.fixed.horizontal,
 			buttons = buttons,
@@ -1189,14 +1108,19 @@ client.connect_signal("request::titlebars", function(c)
 			{align = "left", widget = awful.titlebar.widget.titlewidget(c) },
 		},
 		{ -- Right
-			wrap_widget_hmargin(awful.titlebar.widget.floatingbutton(c)),
-			wrap_widget_hmargin(awful.titlebar.widget.maximizedbutton(c)),
-			wrap_widget_hmargin(awful.titlebar.widget.stickybutton(c)),
-			wrap_widget_hmargin(awful.titlebar.widget.ontopbutton(c)),
+			{
+				awful.titlebar.widget.floatingbutton(c),
+				awful.titlebar.widget.maximizedbutton(c),
+				awful.titlebar.widget.stickybutton(c),
+				awful.titlebar.widget.ontopbutton(c),
+				spacing = 8,
+				layout = wibox.layout.fixed.horizontal()
+			},
 			bar,
-			wrap_widget_hmargin(awful.titlebar.widget.closebutton(c)),
+			awful.titlebar.widget.closebutton(c),
 			layout = wibox.layout.fixed.horizontal()
 		},
+		layout = wibox.layout.align.horizontal
 	}
 end)
 
