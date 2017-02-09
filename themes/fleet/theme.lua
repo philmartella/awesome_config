@@ -8,13 +8,13 @@ theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
 
 -- {{{ Fonts & Colors
 theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/wallpaper.png"
-theme.font                          = "Verdana 10"
-theme.fg_normal                     = "#FFFFFFFF"
-theme.bg_normal                     = "#000000AA"
-theme.fg_focus                      = "#0099CCFF"
-theme.bg_focus                      = "#FFFFFFFF"
-theme.fg_urgent                     = "#CC9393FF"
-theme.bg_urgent                     = "#2A1F1EFF"
+theme.font                          = "sans 10"
+theme.fg_normal                     = "#FFFFFFCC"
+theme.bg_normal                     = "#000000CC"
+theme.fg_focus                      = "#FFFFFFFF"
+theme.bg_focus                      = "#000000FF"
+theme.fg_urgent                     = "#000000FF"
+theme.bg_urgent                     = "#FF0000FF"
 -- }}}
 
 -- {{{ Borders
@@ -105,7 +105,7 @@ theme.layout_floating               = theme.icon_dir .. "/floating.xpm"
 -- {{{ Tasklist
 theme.tasklist_fg_normal            = "#777777"
 theme.tasklist_bg_normal            = "transparent"
-theme.tasklist_fg_focus             = "#4CB7DB"
+theme.tasklist_fg_focus             = "#FFFFFF"
 theme.tasklist_bg_focus             = "transparent"
 --theme.tasklist_bg_focus             = "png:" .. theme.icon_dir .. "/bg_focus.png"
 theme.tasklist_disable_icon         = true

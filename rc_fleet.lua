@@ -83,6 +83,9 @@ awful.layout.layouts = {
 awful.titlebar.enable_tooltip = false
 naughty.config.defaults.timeout = 0
 naughty.config.presets.low.timeout = 4
+naughty.config.presets.low.border_color = "#FFFFFF"
+naughty.config.presets.normal.border_color = "#FFFFFF"
+naughty.config.presets.critical.border_color = "#FFFFFF"
 -- }}}
 
 -- {{{ Helper functions
@@ -146,6 +149,14 @@ local function set_wallpaper(s)
 			end
 		end
 	end)
+end
+
+local function adjust_client_border (c)
+	if c.maximized_horizontal == true and c.maximized_vertical == true then
+		c.border_width = 0
+	else
+		c.border_width = beautiful.border_width
+	end
 end
 
 local function wrap_widget_vmargin (widget)
@@ -576,9 +587,16 @@ awful.screen.connect_for_each_screen(function(s)
 			id = 'closebutton',
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
-				w:set_image(theme.titlebar_close_button_normal)
+				local image = fleet.widget.client_control.button_img('close', c)
+				if image then
+					w:set_image(image)
+				end
 
-        w:buttons(awful.button({}, 1, nil, function () c:kill() end))
+				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function () c:kill() end))
+			end,
+			reset = function (w)
+				w:set_image(beautiful.none_normal)
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -586,10 +604,15 @@ awful.screen.connect_for_each_screen(function(s)
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c, s)
 				local image = fleet.widget.client_control.button_img('floating', c)
+				if image then
+					w:set_image(image)
+				end
 
-				w:set_image(image)
-
-        w:buttons(awful.button({}, 1, nil, function () awful.client.floating.toggle(c) end))
+				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function () awful.client.floating.toggle(c) end))
+			end,
+			reset = function (w)
+				w:set_image(beautiful.none_normal)
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -598,13 +621,18 @@ awful.screen.connect_for_each_screen(function(s)
 			update = function (w, c)
 				local state = c.maximized_horizontal or c.maximized_vertical
 				local image = fleet.widget.client_control.button_img('maximized', c)
+				if image then
+					w:set_image(image)
+				end
 
-				w:set_image(image)
-
-        w:buttons(awful.button({}, 1, nil, function ()
+				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function ()
 					c.maximized_horizontal = not state
 					c.maximized_vertical = not state
 				end))
+			end,
+			reset = function (w)
+				w:set_image(beautiful.none_normal)
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -612,10 +640,15 @@ awful.screen.connect_for_each_screen(function(s)
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
 				local image = fleet.widget.client_control.button_img('minimized', c)
+				if image then
+					w:set_image(image)
+				end
 
-				w:set_image(image)
-
-        w:buttons(awful.button({}, 1, nil, function () c.minimized = not c.minimized end))
+				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function () c.minimized = not c.minimized end))
+			end,
+			reset = function (w)
+				w:set_image(beautiful.none_normal)
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -623,10 +656,15 @@ awful.screen.connect_for_each_screen(function(s)
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
 				local image = fleet.widget.client_control.button_img('ontop', c)
+				if image then
+					w:set_image(image)
+				end
 
-				w:set_image(image)
-
-        w:buttons(awful.button({}, 1, nil, function () c.ontop = not c.ontop end))
+				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function () c.ontop = not c.ontop end))
+			end,
+			reset = function (w)
+				w:set_image(beautiful.none_normal)
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -634,10 +672,15 @@ awful.screen.connect_for_each_screen(function(s)
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
 				local image = fleet.widget.client_control.button_img('sticky', c)
+				if image then
+					w:set_image(image)
+				end
 
-				w:set_image(image)
-
-        w:buttons(awful.button({}, 1, nil, function () c.sticky = not c.sticky end))
+				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function () c.sticky = not c.sticky end))
+			end,
+			reset = function (w)
+				w:set_image(beautiful.none_normal)
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -645,20 +688,25 @@ awful.screen.connect_for_each_screen(function(s)
 			widget = wibox.widget.textbox('<span color="red">~</span>'),
 			update = function (w, c)
 				local name = (awful.util.escape(c.name) or awful.util.escape("<untitled>"))
-				local color = '#FFFFFF'
+				local color = fleet.widget.client_control.fg_color(c)
 
 				w:set_markup('<span foreground="'..color..'">'..name..'</span>')
-				w:set_align("right")
-				w:set_ellipsize("right")
-
-				--w:set_wrap("WORD")
-				--w:set_forced_width(200)
+			end,
+			reset = function (w)
+				w:set_markup('<span color="red">~</span>')
 			end
 		},
 		{
 			id = 'icon',
 			widget = wibox.widget.imagebox(beautiful.application_icon),
 			update = function (w, c)
+				if c.icon then
+					w:set_image(c.icon)
+				else
+					w:set_image(beautiful.application_icon)
+				end
+			end,
+			reset = function (w, c)
 				w:set_image(beautiful.application_icon)
 			end
 		},
@@ -682,6 +730,10 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 		bar,
 		s.clientcontrols.widget.closebutton,
+		buttons = awful.util.table.join(
+			awful.button({ }, 4, function () awful.client.focus.byidx(1) end),
+			awful.button({ }, 5, function () awful.client.focus.byidx(-1) end)
+		),
 		layout = wibox.layout.fixed.horizontal
 	}
 
@@ -1070,7 +1122,7 @@ awful.rules.rules = {
 
 	-- Add titlebars to normal clients
 	{ rule = { type = "normal" },
-		properties = { titlebars_enabled = true } },
+		properties = { titlebars_enabled = false } },
 
 	-- Center placement of dialog clients
 	{ rule = { type = "dialog" },
@@ -1081,6 +1133,9 @@ awful.rules.rules = {
 			instance = {
 				"pavucontrol",
 				"gnome",
+				"eog",
+				"gpk",
+				"dconf",
 				"DTA",  -- Firefox addon DownThemAll.
 				"copyq",  -- Includes session name in class.
 			},
@@ -1095,7 +1150,9 @@ awful.rules.rules = {
 				"veromix",
 				"xtightvncviewer",
 				"MPlayer",
-				"Gtk-recordMyDesktop"
+				"Gtk-recordMyDesktop",
+				"Wallp",
+				"Nautilus",
 			},
 			name = {
 				"Event Tester",  -- xev.
@@ -1110,33 +1167,6 @@ awful.rules.rules = {
 			placement = awful.placement.centered
 		},
 	},
-
-	-- No titlebar clients
-	{ rule_any = {
-			instance = {
-				"eog",
-				"gnome",
-				"gpk",
-				"dconf",
-			},
-			class = {
-				"Geary",
-				"Chromium",
-				"Firefox",
-				"Nautilus",
-				"Kruler",
-				"MessageWin",
-				"Gtk-recordMyDesktop",
-				"Wallp"
-			},
-			role = {
-				"AlarmWindow",
-			}
-		},
-		properties = {
-			titlebars_enabled = false
-		}
-	}
 }
 -- }}}
 
@@ -1149,11 +1179,7 @@ screen.connect_signal("arrange", function ()
 
 	if #clients > 0 then
 		for _, c in pairs(clients) do
-			if c.maximized_horizontal == true and c.maximized_vertical == true then
-				c.border_width = 0
-			else
-				c.border_width = beautiful.border_width
-			end
+			adjust_client_border(c)
 		end
 	end
 end)
@@ -1225,6 +1251,9 @@ client.connect_signal("mouse::enter", function(c)
 	end
 end)
 
+client.connect_signal("property::maximized_horizontal", adjust_client_border)
+client.connect_signal("property::maximized_vertical", adjust_client_border)
+client.connect_signal("property::minimized", adjust_client_border)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}

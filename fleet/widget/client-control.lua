@@ -6,17 +6,13 @@ local capi = {
 	screen = screen,
 	client = client
 }
-local ipairs = ipairs
+local pairs = pairs
 local setmetatable = setmetatable
 local table = table
 local awful = require("awful")
-local common = require("awful.widget.common")
 local util = require("awful.util")
 local tag = require("awful.tag")
-local timer = require("gears.timer")
-local wibox = require("wibox")
 local beautiful = require("beautiful")
-local naughty = require("naughty")
 
 local clientcontrol = {
 	widget = {}
@@ -34,6 +30,7 @@ end
 local function get_lists (args)
 	local wlist = {}
 	local flist = {}
+	local rlist = {}
 
 	for _, d in pairs(args) do
 		local id = d.id or _
@@ -45,15 +42,35 @@ local function get_lists (args)
 		if d.update and 'function' == type(d.update) then
 			flist[id] = d.update
 		end
+
+		if d.reset and 'function' == type(d.reset) then
+			rlist[id] = d.reset
+		end
 	end
 
-	return wlist, flist
+	return wlist, flist, rlist
 end
 
-local function widget_update(w, c, s, filter, data, uf)
-	if uf and c and s and c.screen == s and filter(c, s) then
-		uf(w, c, s)
+local function widget_update_no_client (w, s, filter, data, uf)
+	local oc = awful.client.focus.history.get(s, 0)
+
+	if oc then
+		uf(w, oc, s)
+	else
+		w._do_widget_reset()
 	end
+end
+
+local function widget_update (w, c, s, filter, data, uf)
+	if c and s and c.screen == s and filter(c, s) and not c.hidden then
+		uf(w, c, s)
+	elseif s then
+		widget_update_no_client(w, s, filter, data, uf)
+	end
+end
+
+local function widget_reset (w, s, filter, data, rf)
+	rf(w)
 end
 
 local function new(screen, args, filter)
@@ -62,28 +79,26 @@ local function new(screen, args, filter)
 	local args = args or {}
 	local sw = { widget = {} }
 
-	local wlist, flist = get_lists(args)
+	local wlist, flist, rlist = get_lists(args)
 
 	local data = setmetatable({}, { __mode = 'k' })
 
 	for id, w in pairs(wlist) do
-		local queued_update = false
-
-		function w._do_widget_update(c)
-			-- Add a delayed callback for the first update.
-			if not queued_update then
-				timer.delayed_call(function()
-					queued_update = false
-					if screen.valid then
-						local uf = flist[id] or clientcontrol.update_function
-						widget_update(w, c, screen, filter, data, uf)
-					end
-				end)
-				queued_update = true
+		function w._do_widget_update (c)
+			if screen.valid then
+				local uf = flist[id] or clientcontrol.update_function
+				widget_update(w, c, screen, filter, data, uf)
 			end
 		end
 
-		function w._unmanage(c)
+		function w._do_widget_reset ()
+			if screen.valid then
+				local rf = rlist[id] or clientcontrol.reset_function
+				widget_reset(w, screen, filter, data, rf)
+			end
+		end
+
+		function w._unmanage (c)
 			data[c] = nil
 		end
 	end
@@ -109,8 +124,8 @@ local function new(screen, args, filter)
 			end
 		end
 
-		--tag.attached_connect_signal(nil, "property::selected", u)
-		--tag.attached_connect_signal(nil, "property::activated", u)
+		tag.attached_connect_signal(nil, "property::selected", function () u() end)
+		tag.attached_connect_signal(nil, "property::activated", function () u() end)
 		capi.client.connect_signal("property::urgent", u)
 		capi.client.connect_signal("property::sticky", u)
 		capi.client.connect_signal("property::ontop", u)
@@ -123,8 +138,8 @@ local function new(screen, args, filter)
 		capi.client.connect_signal("property::name", u)
 		capi.client.connect_signal("property::icon_name", u)
 		capi.client.connect_signal("property::icon", u)
-		--capi.client.connect_signal("property::skip_taskbar", u)
-		--capi.client.connect_signal("property::hidden", u)
+		capi.client.connect_signal("property::skip_taskbar", u)
+		capi.client.connect_signal("property::hidden", u)
 		capi.client.connect_signal("tagged", u)
 		capi.client.connect_signal("untagged", u)
 		capi.client.connect_signal("list", u)
@@ -135,7 +150,7 @@ local function new(screen, args, filter)
 			uw(old_screen, c)
 		end)
 		capi.client.connect_signal("unmanage", function(c)
-			u(c)
+			u()
 			for _, i in pairs(instances) do
 				for _, w in pairs(i) do
 					w._unmanage(c)
@@ -162,16 +177,29 @@ local function new(screen, args, filter)
 	return sw
 end
 
-
-function clientcontrol.update_function (w, c)
+function clientcontrol.update_function (w, c, s)
 	--naughty.notify({text = 'update'})
+end
+
+function clientcontrol.reset_function (w)
+	--naughty.notify({text = 'update'})
+end
+
+function clientcontrol.fg_color (c)
+	local color = beautiful.tasklist_fg_normal or beautiful.fg_normal or '#777777'
+
+	if c.screen == awful.screen.focused({client = true, mouse = false}) then
+		color = beautiful.tasklist_fg_focus or beautiful.fg_focus or '#FFFFFF'
+	end
+
+	return color
 end
 
 function clientcontrol.button_img (button, c)
 	local prefix = 'normal'
 	local state = 'inactive'
 
-	if c.screen == awful.screen.focused() then
+	if c.screen == awful.screen.focused({client = true, mouse = false}) then
 		prefix = 'focus'
 	end
 
@@ -180,9 +208,22 @@ function clientcontrol.button_img (button, c)
 	end
 
 	local img = beautiful['titlebar_' .. button .. '_button_' .. prefix .. '_' .. state]
+		or beautiful['titlebar_' .. button .. '_button_' .. prefix]
 		or beautiful.none_normal or nil
 
 	return img
+end
+
+function clientcontrol.bind_focus (c, w, buttons)
+	if c.screen == awful.screen.focused({client = true, mouse = false}) then
+		w:buttons(buttons)
+	else
+		w:buttons(util.table.join())
+	end
+end
+
+function clientcontrol.unbind_all (w)
+		w:buttons(util.table.join())
 end
 
 return setmetatable(clientcontrol, { __call = function(_, ...) return new(...) end})

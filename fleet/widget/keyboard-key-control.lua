@@ -1,4 +1,5 @@
 local pairs = pairs
+local timer = require("gears.timer")
 local awful = require("awful")
 local wibox = require("wibox")
 local naughty = require("naughty")
