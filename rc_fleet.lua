@@ -63,12 +63,12 @@ awful.layout.layouts = {
 	awful.layout.suit.floating,
 	awful.layout.suit.max,
 	-- awful.layout.suit.max.fullscreen,
+	awful.layout.suit.fair,
+	awful.layout.suit.fair.horizontal,
 	awful.layout.suit.tile,
 	awful.layout.suit.tile.left,
 	awful.layout.suit.tile.top,
 	awful.layout.suit.tile.bottom,
-	-- awful.layout.suit.fair,
-	-- awful.layout.suit.fair.horizontal,
 	-- awful.layout.suit.spiral,
 	-- awful.layout.suit.spiral.dwindle,
 	-- awful.layout.suit.magnifier,
@@ -1120,17 +1120,21 @@ awful.rules.rules = {
 		}
 	},
 
-	-- Add titlebars to normal clients
+	-- Remove titlebars to normal clients
 	{ rule = { type = "normal" },
 		properties = { titlebars_enabled = false } },
 
 	-- Center placement of dialog clients
-	{ rule = { type = "dialog" },
-		properties = { placement = awful.placement.centered } },
+	--{ rule = { type = "dialog" },
+	--	properties = { placement = awful.placement.centered } },
 
 	-- Floating clients.
 	{ rule_any = {
+			type = {
+				"dialog",
+			},
 			instance = {
+				"nitrogen",
 				"pavucontrol",
 				"gnome",
 				"eog",
@@ -1165,6 +1169,26 @@ awful.rules.rules = {
 		properties = {
 			floating = true,
 			placement = awful.placement.centered
+		},
+	},
+
+	-- Add totlebars clients
+	{ rule_any = {
+			instance = {
+				"nitrogen",
+				"pavucontrol",
+				"DTA",  -- Firefox addon DownThemAll.
+			},
+			class = {
+				"Arandr",
+				"Wpa_gui",
+			},
+			role = {
+				"pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+			}
+		},
+		properties = {
+			titlebars_enabled = true
 		},
 	},
 }

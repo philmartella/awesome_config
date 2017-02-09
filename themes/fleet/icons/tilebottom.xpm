@@ -19,7 +19,7 @@ static char *tilebottom[] = {
 "X                X",
 "X XXXX XXXX XXXX X",
 "X XXXX XXXX XXXX X",
-"X                X",
+"X XXXX XXXX XXXX X",
 "X XXXX XXXX XXXX X",
 "X XXXX XXXX XXXX X",
 "X                X",

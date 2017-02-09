@@ -8,7 +8,7 @@ theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
 
 -- {{{ Fonts & Colors
 theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/wallpaper.png"
-theme.font                          = "sans 10"
+theme.font                          = "sans 12"
 theme.fg_normal                     = "#FFFFFFCC"
 theme.bg_normal                     = "#000000CC"
 theme.fg_focus                      = "#FFFFFFFF"
@@ -115,7 +115,7 @@ theme.tasklist_floating             = "⠺"
 -- }}}
 
 -- {{{ Systray
-theme.bg_systray = "#000000FF"
+theme.bg_systray = "#000000"
 theme.systray_icon_spacing = 4
 -- }}}
 
@@ -129,8 +129,8 @@ theme.progressbar_bar_border_color  = "#AAAAAA"
 -- {{{ Titlebar
 --theme.titlebar_bg_focus  = "xpm:" .. theme.titlebar_path .. "bg_left_focus.xpm"
 --theme.titlebar_bg_normal = "xpm:" .. theme.titlebar_path .. "bg_left_normal.xpm"
-theme.titlebar_bg_focus  = "#000000AA"
-theme.titlebar_bg_normal = "#000000AA"
+theme.titlebar_bg_focus  = "#000000FF"
+theme.titlebar_bg_normal = "#000000FF"
 
 theme.titlebar_close_button_focus               = theme.titlebar_path .. "close_focus.xpm"
 theme.titlebar_close_button_normal              = theme.titlebar_path .. "close_normal.xpm"

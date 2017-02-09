@@ -10,7 +10,7 @@ static char *tiletop[] = {
 "X                X",
 "X XXXX XXXX XXXX X",
 "X XXXX XXXX XXXX X",
-"X                X",
+"X XXXX XXXX XXXX X",
 "X XXXX XXXX XXXX X",
 "X XXXX XXXX XXXX X",
 "X                X",

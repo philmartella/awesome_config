@@ -52,10 +52,10 @@ local function get_lists (args)
 end
 
 local function widget_update_no_client (w, s, filter, data, uf)
-	local oc = awful.client.focus.history.get(s, 0)
+	local c = awful.client.focus.history.get(s, 0)
 
-	if oc then
-		uf(w, oc, s)
+	if c and s and filter(c, s) and not c.hidden then
+		uf(w, c, s, data[c])
 	else
 		w._do_widget_reset()
 	end
@@ -63,7 +63,7 @@ end
 
 local function widget_update (w, c, s, filter, data, uf)
 	if c and s and c.screen == s and filter(c, s) and not c.hidden then
-		uf(w, c, s)
+		uf(w, c, s, data[c])
 	elseif s then
 		widget_update_no_client(w, s, filter, data, uf)
 	end
