@@ -1122,15 +1122,7 @@ awful.rules.rules = {
 		}
 	},
 
-	-- Remove titlebars to normal clients
-	{ rule = { type = "normal" },
-		properties = { titlebars_enabled = false } },
-
-	-- Center placement of dialog clients
-	--{ rule = { type = "dialog" },
-	--	properties = { placement = awful.placement.centered } },
-
-	-- Floating clients.
+	-- Floating and Centered clients.
 	{ rule_any = {
 			type = {
 				"dialog",
@@ -1142,14 +1134,14 @@ awful.rules.rules = {
 				"eog",
 				"gpk",
 				"dconf",
-				"DTA",  -- Firefox addon DownThemAll.
-				"copyq",  -- Includes session name in class.
+				"DTA", -- Firefox addon DownThemAll.
+				"copyq", -- Includes session name in class.
 			},
 			class = {
 				"Arandr",
 				"Gpick",
 				"Kruler",
-				"MessageWin",  -- kalarm.
+				"MessageWin", -- kalarm.
 				"Sxiv",
 				"Wpa_gui",
 				"pinentry",
@@ -1161,11 +1153,12 @@ awful.rules.rules = {
 				"Nautilus",
 			},
 			name = {
-				"Event Tester",  -- xev.
+				"Event Tester", -- xev.
 			},
 			role = {
-				"AlarmWindow",  -- Thunderbird's calendar.
-				"pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+				"AlarmWindow", -- Thunderbird's calendar.
+				"pop-up", -- e.g. Google Chrome's (detached) Developer Tools.
+				"gimp-file-open",
 			}
 		},
 		properties = {
@@ -1174,19 +1167,19 @@ awful.rules.rules = {
 		},
 	},
 
-	-- Add totlebars clients
+	-- Titlebar clients
 	{ rule_any = {
 			instance = {
 				"nitrogen",
 				"pavucontrol",
-				"DTA",  -- Firefox addon DownThemAll.
+				"DTA",
 			},
 			class = {
 				"Arandr",
 				"Wpa_gui",
 			},
 			role = {
-				"pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+				"pop-up",
 			}
 		},
 		properties = {
@@ -1217,8 +1210,7 @@ client.connect_signal("manage", function (c)
 	-- if not awesome.startup then awful.client.setslave(c) end
 
 	if awesome.startup and
-		not c.size_hints.user_position
-		and not c.size_hints.program_position then
+		not c.size_hints.user_position and not c.size_hints.program_position then
 		-- Prevent clients from being unreachable after screen count changes.
 		awful.placement.no_offscreen(c)
 	end
