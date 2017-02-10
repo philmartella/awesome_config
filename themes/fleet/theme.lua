@@ -8,7 +8,7 @@ theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
 
 -- {{{ Fonts & Colors
 theme.wallpaper                     = os.getenv("HOME") .. "/.config/awesome/wallpaper.png"
-theme.font                          = "sans 12"
+theme.font                          = "sans 10"
 theme.fg_normal                     = "#FFFFFFCC"
 theme.bg_normal                     = "#000000CC"
 theme.fg_focus                      = "#FFFFFFFF"

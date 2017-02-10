@@ -256,11 +256,13 @@ kbdleds = fleet.widget.keyboard_key_control({
 	}
 })
 
+--[[
 kbdkeys = fleet.widget.keyboard_key_control({
 	keys = {
 		{ name = ' ⏎ ', key = 'Return' }
 	}
 })
+--]]
 
 keyboardwidget = wibox.widget {
 	{
@@ -271,8 +273,8 @@ keyboardwidget = wibox.widget {
 	kbdlayout.widget,
 	bar,
 	kbdleds.widget,
-	bar,
-	kbdkeys.widget,
+--	bar,
+--	kbdkeys.widget,
 	layout = wibox.layout.fixed.horizontal
 }
 
@@ -380,13 +382,13 @@ vicious.register(memwidget.usage, vicious.widgets.mem, function (widget, args)
 
 	if args[9] > 999999 then
 		usage = args[9] / 1048576
-		metric = 'TB'
+		metric = 'T'
 	elseif args[9] > 999 then
 		usage = args[9] / 1024
-		metric = 'GB'
+		metric = 'G'
 	else
 		usage = args[9]
-		metric = 'MB'
+		metric = 'M'
 	end
 
 	if usage > 99.9 then
@@ -443,16 +445,16 @@ vicious.register(diowidget, vicious.widgets.dio, function (widget, args)
 
 	if r_kb > 999999999 then
 		r_s = r_kb / 1073741824
-		r_m = 'TB'
+		r_m = 'T'
 	elseif r_kb > 999999 then
 		r_s = r_kb / 1048576
-		r_m = 'GB'
+		r_m = 'G'
 	elseif r_kb > 999 then
 		r_s = r_kb / 1024
-		r_m = 'MB'
+		r_m = 'M'
 	else
 		r_s = r_kb
-		r_m = 'KB'
+		r_m = 'K'
 	end
 
 	if r_s > 99.9 then
@@ -471,16 +473,16 @@ vicious.register(diowidget, vicious.widgets.dio, function (widget, args)
 
 	if w_kb > 999999999 then
 		w_s = w_kb / 1073741824
-		w_m = 'TB'
+		w_m = 'T'
 	elseif w_kb > 999999 then
 		w_s = w_kb / 1048576
-		w_m = 'GB'
+		w_m = 'G'
 	elseif w_kb > 999 then
 		w_s = w_kb / 1024
-		w_m = 'MB'
+		w_m = 'M'
 	else
 		w_s = w_kb
-		w_m = 'KB'
+		w_m = 'K'
 	end
 
 	if w_s > 99.9 then
@@ -502,8 +504,8 @@ vicious.register(diowidget, vicious.widgets.dio, function (widget, args)
 	end
 
 	widget.disk:set_markup('<span color="'..d_c..'">'..dev..'</span>')
-	widget.reads:set_markup('<span color="'..r_c..'">'..reads..'</span> '..r_m..'s')
-	widget.writes:set_markup('<span color="'..w_c..'">'..writes..'</span> '..w_m..'s')
+	widget.reads:set_markup('<span color="'..r_c..'">'..reads..'</span> '..r_m)
+	widget.writes:set_markup('<span color="'..w_c..'">'..writes..'</span> '..w_m)
 	return
 end, 1)
 
@@ -636,7 +638,7 @@ awful.screen.connect_for_each_screen(function(s)
 			end
 		},
 		{
-			id = 'minimizebutton',
+			id = 'minimizedbutton',
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
 				local image = fleet.widget.client_control.button_img('minimized', c)
