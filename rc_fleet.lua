@@ -1241,18 +1241,18 @@ client.connect_signal("request::titlebars", function(c)
 		end)
 	)
 
-	awful.titlebar(c, {size = 18}) : setup {
-		{ -- Left
-			layout = wibox.layout.fixed.horizontal,
-			buttons = buttons,
+	local titlebar = {
+		icon = wibox.widget {
 			awful.titlebar.widget.iconwidget(c),
-		},
-		{ -- Middle
-			layout = wibox.layout.flex.horizontal,
 			buttons = buttons,
-			{align = "left", widget = awful.titlebar.widget.titlewidget(c) },
+			layout = wibox.layout.fixed.horizontal,
 		},
-		{ -- Right
+		title = wibox.widget {
+			{align = "left", widget = awful.titlebar.widget.titlewidget(c) },
+			buttons = buttons,
+			layout = wibox.layout.flex.horizontal,
+		},
+		control = wibox.widget {
 			{
 				awful.titlebar.widget.floatingbutton(c),
 				awful.titlebar.widget.maximizedbutton(c),
@@ -1265,6 +1265,12 @@ client.connect_signal("request::titlebars", function(c)
 			awful.titlebar.widget.closebutton(c),
 			layout = wibox.layout.fixed.horizontal()
 		},
+	}
+
+	awful.titlebar(c, {size = 22}) : setup {
+		wrap_widget_hmargin(titlebar.icon),
+		wrap_widget_hmargin(titlebar.title),
+		wrap_widget_hmargin(titlebar.control),
 		layout = wibox.layout.align.horizontal
 	}
 end)

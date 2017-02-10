@@ -28,7 +28,7 @@ theme.border_focus                  = "#0099CCFF"
 theme.textbox_widget_margin_top     = 1
 theme.awful_widget_height           = 16
 theme.awful_widget_margin_top       = 2
-theme.widget_bg                     = '#333333'
+theme.widget_bg                     = '#31393E'
 -- }}}
 
 -- {{{ Menu
@@ -38,7 +38,7 @@ theme.submenu_icon                  = theme.icon_dir .. "/submenu.xpm"
 theme.menu_fg_focus                 = "#111111FF"
 theme.menu_bg_focus                 = "#0099CCFF"
 theme.menu_fg_normal                = "#EFEFEFFF"
-theme.menu_bg_normal                = "#333333FF"
+theme.menu_bg_normal                = "#31393EFF"
 theme.menu_border_color             = "#FFFFFFFF"
 theme.menu_border_width             = "2"
 -- }}}
@@ -129,8 +129,8 @@ theme.progressbar_bar_border_color  = "#AAAAAA"
 -- {{{ Titlebar
 --theme.titlebar_bg_focus  = "xpm:" .. theme.titlebar_path .. "bg_left_focus.xpm"
 --theme.titlebar_bg_normal = "xpm:" .. theme.titlebar_path .. "bg_left_normal.xpm"
-theme.titlebar_bg_focus  = "#000000FF"
-theme.titlebar_bg_normal = "#000000FF"
+theme.titlebar_bg_focus  = "#31393EFF"
+theme.titlebar_bg_normal = "#31393EFF"
 
 theme.titlebar_close_button_focus               = theme.titlebar_path .. "close_focus.xpm"
 theme.titlebar_close_button_normal              = theme.titlebar_path .. "close_normal.xpm"
