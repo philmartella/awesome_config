@@ -63,9 +63,7 @@ function kcontrol:notify_led_status(name, key, led, led_status, silent)
 			title = tostring(led),
 			icon = beautiful.icon_dir..'/key_'..key..'_'..led_status..'.png',
 			position = self.position,
-			bg = self.bg,
 			fg = self.led_status[led_status],
-			border_color = self.led_status[led_status],
 			preset = naughty.config.presets.low,
 			replaces_id = notification_id,
 		}).id
