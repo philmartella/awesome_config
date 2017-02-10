@@ -69,8 +69,8 @@ local function widget_update (w, c, s, filter, data, uf)
 	end
 end
 
-local function widget_reset (w, s, filter, data, rf)
-	rf(w)
+local function widget_reset (w, s, rf)
+	rf(w, s)
 end
 
 local function new(screen, args, filter)
@@ -94,7 +94,7 @@ local function new(screen, args, filter)
 		function w._do_widget_reset ()
 			if screen.valid then
 				local rf = rlist[id] or clientcontrol.reset_function
-				widget_reset(w, screen, filter, data, rf)
+				widget_reset(w, s, rf)
 			end
 		end
 
@@ -124,6 +124,14 @@ local function new(screen, args, filter)
 			end
 		end
 
+		local function um (c)
+			for _, i in pairs(instances) do
+				for _, w in pairs(i) do
+					w._unmanage(c)
+				end
+			end
+		end
+
 		tag.attached_connect_signal(nil, "property::selected", function () u() end)
 		tag.attached_connect_signal(nil, "property::activated", function () u() end)
 		capi.client.connect_signal("property::urgent", u)
@@ -145,19 +153,15 @@ local function new(screen, args, filter)
 		capi.client.connect_signal("list", u)
 		capi.client.connect_signal("focus", u)
 		--capi.client.connect_signal("unfocus", u)
-		capi.client.connect_signal("property::screen", function(c, old_screen)
+		capi.client.connect_signal("property::screen", function (c, old_screen)
 			uw(c.screen, c)
 			uw(old_screen, c)
 		end)
-		capi.client.connect_signal("unmanage", function(c)
+		capi.client.connect_signal("unmanage", function (c)
 			u()
-			for _, i in pairs(instances) do
-				for _, w in pairs(i) do
-					w._unmanage(c)
-				end
-			end
+			um(c)
 		end)
-		capi.screen.connect_signal("removed", function(s)
+		capi.screen.connect_signal("removed", function (s)
 			instances[get_screen(s)] = nil
 		end)
 	end
@@ -177,12 +181,10 @@ local function new(screen, args, filter)
 	return sw
 end
 
-function clientcontrol.update_function (w, c, s)
-	--naughty.notify({text = 'update'})
+function clientcontrol.update_function (widget, client, screen, data)
 end
 
-function clientcontrol.reset_function (w)
-	--naughty.notify({text = 'update'})
+function clientcontrol.reset_function (widget, screen)
 end
 
 function clientcontrol.fg_color (c)
@@ -223,7 +225,7 @@ function clientcontrol.bind_focus (c, w, buttons)
 end
 
 function clientcontrol.unbind_all (w)
-		w:buttons(util.table.join())
+	w:buttons(util.table.join())
 end
 
 return setmetatable(clientcontrol, { __call = function(_, ...) return new(...) end})

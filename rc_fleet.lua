@@ -128,6 +128,47 @@ local function client_menu_toggle_fn()
 	end
 end
 
+local function delete_tag()
+    local t = awful.screen.focused().selected_tag
+    if not t then return end
+    t:delete()
+end
+
+local function rename_tag ()
+	awful.prompt.run {
+		prompt       = "Tag Name: ",
+		textbox      = awful.screen.focused().mypromptbox.widget,
+		exe_callback = function(new_name)
+			if not new_name or #new_name == 0 then return end
+
+			local t = awful.screen.focused().selected_tag
+			if t then
+				t.name = new_name
+			end
+		end
+	}
+end
+
+local function rename_tag_dmenu ()
+	currScreen = awful.screen.focused().index or 1
+	currTag = awful.tag.getidx(awful.tag.selected())
+	currText = awful.tag.selected().name:gsub("^%s*(.-)%s*$", "%1")
+	currText = currText:gsub('%[' .. currTag .. '%]', '')
+	currText = currText:gsub("^%s*(.-)%s*$", "%1")
+
+	local dprompt = io.popen("echo "..currText.." | dmenu -m "..(currScreen - 1).." -fn 'Source Code Pro-14' -nb '#333333' -nf '#cccccc' -sb '#285577' -sf '#ffffff' -p 'Tag Name'", "r")
+	local dpromptOut = dprompt:read("*a"):gsub("^%s*(.-)%s*$", "%1")
+	dprompt:close()
+
+	if string.len(dpromptOut) == 0 then
+		tagName = ''.. currTag ..''
+		awful.tag.selected().name = tagName
+	else
+		tagName = '[' .. currTag .. '] ' .. dpromptOut .. ''
+		awful.tag.selected().name = tagName
+	end
+end
+
 local function set_wallpaper_beautiful (s)
 	local wallpaper = beautiful.wallpaper
 
@@ -176,7 +217,7 @@ end
 -- {{{ Menu
 -- Create a launcher widget and a main menu
 myawesomemenu = {
-	{ "hotkeys", function() return false, hotkeys_popup.show_help end},
+	{ "hotkeys", function() return false, hotkeys_popup.show_help end },
 	{ "manual", terminal .. " -e man awesome" },
 	{ "edit config", editor_cmd .. " " .. awesome.conffile }
 }
@@ -802,25 +843,8 @@ clientbuttons = awful.util.table.join(
 
 -- {{{ Global key bindings
 globalkeys = awful.util.table.join(
-	awful.key({ modkey }, "F2", function ()
-		currScreen = awful.screen.focused().index or 1
-		currTag = awful.tag.getidx(awful.tag.selected())
-		currText = awful.tag.selected().name:gsub("^%s*(.-)%s*$", "%1")
-		currText = currText:gsub('%[' .. currTag .. '%]', '')
-		currText = currText:gsub("^%s*(.-)%s*$", "%1")
-
-		local dprompt = io.popen("echo "..currText.." | dmenu -m "..(currScreen - 1).." -fn 'Source Code Pro-14' -nb '#333333' -nf '#cccccc' -sb '#285577' -sf '#ffffff' -p 'Tag Name'", "r")
-		local dpromptOut = dprompt:read("*a"):gsub("^%s*(.-)%s*$", "%1")
-		dprompt:close()
-
-		if string.len(dpromptOut) == 0 then
-			tagName = ''.. currTag ..''
-			awful.tag.selected().name = tagName
-		else
-			tagName = '[' .. currTag .. '] ' .. dpromptOut .. ''
-			awful.tag.selected().name = tagName
-		end
-	end, {description = "Rename current tag", group = "tag"}),
+	awful.key({ modkey }, "F2", rename_tag,
+	{description = "Rename current tag", group = "tag"}),
 
 	-- Screen browsing
 	awful.key({ modkey }, "h", function () awful.screen.focus_bydirection("left") end,

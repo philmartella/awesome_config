@@ -1,7 +1,3 @@
---[[
-     Fleet Theme for Awesome WM 4.0
---]]
-
 theme                               = {}
 theme.icon_dir                      = os.getenv("HOME") .. "/.config/awesome/themes/fleet/icons"
 theme.titlebar_path                 = theme.icon_dir .. "/titlebar/"
