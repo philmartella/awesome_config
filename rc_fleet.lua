@@ -128,10 +128,51 @@ local function client_menu_toggle_fn()
 	end
 end
 
-local function delete_tag()
-    local t = awful.screen.focused().selected_tag
-    if not t then return end
-    t:delete()
+local function add_tag (s, nofocus)
+	local s = s or awful.screen.focused()
+	local idx = (#s.tags + 1)
+
+	local t = awful.tag.add("", {
+		screen = s,
+		icon = beautiful.tag_icon[idx] or nil,
+    layout = awful.layout.suit.floating,
+    --selected = true,
+	})
+
+	if not nofocus then
+		t:view_only()
+	end
+end
+
+local function move_to_new_tag()
+	local c = client.focus
+	if not c then return end
+
+	local t = awful.tag.add(c.class,{screen= c.screen })
+	c:tags({t})
+	t:view_only()
+end
+
+local function copy_tag ()
+	local t = awful.screen.focused().selected_tag
+	if not t then return end
+
+	local clients = t:clients()
+	local t2 = awful.tag.add(t.name, awful.tag.getdata(t))
+	t2:clients(clients)
+	t2:view_only()
+end
+
+local function delete_tag ()
+	local tags = awful.screen.focused().tags
+	local num_tags = #tags
+	local t = awful.screen.focused().selected_tag
+	if not t or 1 == num_tags then return end
+	t:delete()
+
+	for _, t in pairs(tags) do
+		t.icon = beautiful.tag_icon[t.index] or nil
+	end
 end
 
 local function rename_tag ()
@@ -145,8 +186,7 @@ local function rename_tag ()
 			if t then
 				t.name = new_name
 			end
-		end
-	}
+		end}
 end
 
 local function rename_tag_dmenu ()
@@ -209,7 +249,7 @@ local function wrap_widget_hmargin (widget)
 end
 
 local function wrap_widget (widget)
-	local bg = beautiful.widget_bg or '#000000'
+	local bg = beautiful.bg_normal
 	return wrap_widget_vmargin(wibox.container.background(wrap_widget_hmargin(widget), bg))
 end
 -- }}}
@@ -307,7 +347,7 @@ kbdkeys = fleet.widget.keyboard_key_control({
 
 keyboardwidget = wibox.widget {
 	{
-		image = beautiful.keyboard,
+		image = beautiful.keyboard_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -322,7 +362,7 @@ keyboardwidget = wibox.widget {
 -- Date
 datewidget = wibox.widget {
 	{
-		image = beautiful.calendar,
+		image = beautiful.calendar_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -338,7 +378,7 @@ vicious.register(datewidget.date, vicious.widgets.date, '%a, %b %d', 60)
 -- time
 timewidget = wibox.widget {
 	{
-		image = beautiful.clock,
+		image = beautiful.clock_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -356,7 +396,7 @@ volumecontrol = fleet.widget.volume_control({channel="Master"})
 
 volumewidget = wibox.widget {
 	{
-		image = beautiful.mpd,
+		image = beautiful.mpd_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -367,7 +407,7 @@ volumewidget = wibox.widget {
 -- CPU
 cpuwidget = wibox.widget {
 	{
-		image = beautiful.cpu,
+		image = beautiful.cpu_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -397,7 +437,7 @@ end, 1)
 -- Memory
 memwidget = wibox.widget {
 	{
-		image = beautiful.mem,
+		image = beautiful.mem_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -446,7 +486,7 @@ end, 2)
 -- Disk IO
 diowidget = wibox.widget {
 	{
-		image = beautiful.hdd,
+		image = beautiful.hdd_icon,
 		widget = wibox.widget.imagebox,
 	},
 	bar,
@@ -600,7 +640,15 @@ local tasklist_buttons = awful.util.table.join(
 -- Create a wibox for each screen and add it
 awful.screen.connect_for_each_screen(function(s)
 	-- Each screen has its own tag table.
-	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+	--awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+
+	for i=1, 4 do
+		if 1 == i then
+			add_tag(s)
+		else
+			add_tag(s, true)
+		end
+	end
 
 	-- Create a promptbox for each screen
 	s.mypromptbox = awful.widget.prompt()
@@ -616,13 +664,13 @@ awful.screen.connect_for_each_screen(function(s)
 	awful.button({ }, 5, function () awful.layout.inc(-1) end)))
 
 	-- Create a taglist widget
-	s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons, {spacing = 4})
+	s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons, {spacing = 1})
 
 	-- Create a tasklist widget
 	--s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {align = "right"})
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, screen = s })
+	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, bg = "#000000AA", screen = s })
 
 	-- Client control
 	s.clientcontrols = fleet.widget.client_control(s, {
@@ -741,7 +789,7 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 		{
 			id = 'icon',
-			widget = wibox.widget.imagebox(beautiful.application_icon),
+			widget = wibox.widget.imagebox(),
 			update = function (w, c)
 				if c.icon then
 					w:set_image(c.icon)
@@ -799,7 +847,7 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 30, ontop = true, bg = "transparent", screen = s })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 30, ontop = true, bg = "#000000AA", screen = s })
 
 		s.mybotwibox:setup {
 			{ -- Left widgets
@@ -843,8 +891,24 @@ clientbuttons = awful.util.table.join(
 
 -- {{{ Global key bindings
 globalkeys = awful.util.table.join(
+	-- Tag modification
 	awful.key({ modkey }, "F2", rename_tag,
 	{description = "Rename current tag", group = "tag"}),
+
+	awful.key({ modkey }, "a", add_tag,
+	{description = "add a tag", group = "tag"}),
+
+	awful.key({ modkey, "Shift" }, "a", delete_tag,
+	{description = "delete the current tag", group = "tag"}),
+
+	awful.key({ modkey, "Control" }, "a", move_to_new_tag,
+	{description = "add a tag with the focused client", group = "tag"}),
+
+	awful.key({ modkey, "Mod1" }, "a", copy_tag,
+	{description = "create a copy of the current tag", group = "tag"}),
+
+	awful.key({ modkey, "Shift" }, "r", rename_tag,
+	{description = "rename the current tag", group = "tag"}),
 
 	-- Screen browsing
 	awful.key({ modkey }, "h", function () awful.screen.focus_bydirection("left") end,
@@ -1178,6 +1242,7 @@ awful.rules.rules = {
 			},
 			name = {
 				"Event Tester", -- xev.
+				"Blender User Preferences", -- blender.
 			},
 			role = {
 				"AlarmWindow", -- Thunderbird's calendar.
@@ -1201,6 +1266,10 @@ awful.rules.rules = {
 			class = {
 				"Arandr",
 				"Wpa_gui",
+			},
+			name = {
+				"Event Tester", -- xev.
+				"Blender User Preferences", -- blender.
 			},
 			role = {
 				"pop-up",

@@ -174,6 +174,7 @@ local function new(screen, args, filter)
 	end
 
 	for id, w in pairs(wlist) do
+		w._do_widget_reset()
 		table.insert(list, w)
 		sw.widget[id] = w
 	end
