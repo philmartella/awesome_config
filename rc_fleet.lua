@@ -123,7 +123,7 @@ local function client_menu_toggle_fn()
 			instance:hide()
 			instance = nil
 		else
-			instance = awful.menu.clients({ theme = { width = 250 } })
+			instance = awful.menu.clients({ theme = { width = 400 } }, {}, fleet.widget.client_control.filter.currenttags)
 		end
 	end
 end
@@ -132,9 +132,9 @@ local function add_tag (s, nofocus)
 	local s = s or awful.screen.focused()
 	local idx = (#s.tags + 1)
 
-	local t = awful.tag.add("", {
+	local t = awful.tag.add(idx, {
 		screen = s,
-		icon = beautiful.tag_icon[idx] or nil,
+		--icon = beautiful.tag_icon[idx] or nil,
     layout = awful.layout.suit.floating,
     --selected = true,
 	})
@@ -171,7 +171,9 @@ local function delete_tag ()
 	t:delete()
 
 	for _, t in pairs(tags) do
-		t.icon = beautiful.tag_icon[t.index] or nil
+		if t.icon then
+			t.icon = beautiful.tag_icon[t.index] or nil
+		end
 	end
 end
 
@@ -185,6 +187,7 @@ local function rename_tag ()
 			local t = awful.screen.focused().selected_tag
 			if t then
 				t.name = new_name
+				t.icon = beautiful.tag_icon[t.index] or nil
 			end
 		end}
 end
@@ -610,6 +613,7 @@ local taglist_buttons = awful.util.table.join(
 
 -- Tasklist
 local tasklist_buttons = awful.util.table.join(
+--[[
 	awful.button({ }, 1, function (c)
 		if c == client.focus then
 			c.minimized = true
@@ -626,6 +630,7 @@ local tasklist_buttons = awful.util.table.join(
 			c:raise()
 		end
 	end),
+--]]
 	awful.button({ }, 3, client_menu_toggle_fn()),
 	awful.button({ }, 4, function ()
 		awful.client.focus.byidx(1)
@@ -640,15 +645,7 @@ local tasklist_buttons = awful.util.table.join(
 -- Create a wibox for each screen and add it
 awful.screen.connect_for_each_screen(function(s)
 	-- Each screen has its own tag table.
-	--awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-
-	for i=1, 4 do
-		if 1 == i then
-			add_tag(s)
-		else
-			add_tag(s, true)
-		end
-	end
+	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 
 	-- Create a promptbox for each screen
 	s.mypromptbox = awful.widget.prompt()
@@ -664,10 +661,10 @@ awful.screen.connect_for_each_screen(function(s)
 	awful.button({ }, 5, function () awful.layout.inc(-1) end)))
 
 	-- Create a taglist widget
-	s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons, {spacing = 1})
+	s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons, {spacing = 4})
 
 	-- Create a tasklist widget
-	--s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {align = "right"})
+	--s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {})
 
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, bg = "#000000AA", screen = s })
@@ -804,43 +801,37 @@ awful.screen.connect_for_each_screen(function(s)
 	})
 
 	s.myclientcontrol = wibox.widget {
+		wibox.container.margin(s.clientcontrols.widget.icon, 4, 4, 0, 0),
+		wibox.container.margin(s.clientcontrols.widget.title, 4, 4, 0, 0),
 		{
-			s.clientcontrols.widget.icon,
-			s.clientcontrols.widget.title,
-			spacing = 8,
+			bar,
+			{
+				s.clientcontrols.widget.floatingbutton,
+				s.clientcontrols.widget.maximizedbutton,
+				s.clientcontrols.widget.stickybutton,
+				s.clientcontrols.widget.ontopbutton,
+				spacing = 8,
+				layout = wibox.layout.fixed.horizontal
+			},
+			bar,
+			s.clientcontrols.widget.closebutton,
+			spacing = 4,
 			layout = wibox.layout.fixed.horizontal
 		},
-		bar,
-		{
-			s.clientcontrols.widget.floatingbutton,
-			s.clientcontrols.widget.maximizedbutton,
-			s.clientcontrols.widget.stickybutton,
-			s.clientcontrols.widget.ontopbutton,
-			spacing = 8,
-			layout = wibox.layout.fixed.horizontal
-		},
-		bar,
-		s.clientcontrols.widget.closebutton,
-		buttons = awful.util.table.join(
-			awful.button({ }, 4, function () awful.client.focus.byidx(1) end),
-			awful.button({ }, 5, function () awful.client.focus.byidx(-1) end)
-		),
-		layout = wibox.layout.fixed.horizontal
+		buttons = tasklist_buttons,
+		layout = wibox.layout.align.horizontal
 	}
 
 	-- Add widgets to the wibox
 	s.mywibox:setup {
 		{ -- Left widgets
 			wrap_widget_hmargin(s.mytaglist),
+			wrap_widget_hmargin(bar),
 			wrap_widget_hmargin(s.mylayoutbox),
 			wrap_widget_hmargin(s.mypromptbox),
 			layout = wibox.layout.fixed.horizontal
 		},
 		nil,
-		--{ -- Middle widgets
-			--wrap_widget_hmargin(s.mytasklist), -- Middle widget
-			--layout = wibox.layout.fixed.horizontal
-		--},
 		wrap_widget_hmargin(s.myclientcontrol),
 		layout = wibox.layout.align.horizontal
 	}
@@ -1245,6 +1236,7 @@ awful.rules.rules = {
 				"Blender User Preferences", -- blender.
 			},
 			role = {
+				"app", -- Chrome's app windows
 				"AlarmWindow", -- Thunderbird's calendar.
 				"pop-up", -- e.g. Google Chrome's (detached) Developer Tools.
 				"gimp-file-open",
@@ -1272,6 +1264,7 @@ awful.rules.rules = {
 				"Blender User Preferences", -- blender.
 			},
 			role = {
+				"app",
 				"pop-up",
 			}
 		},

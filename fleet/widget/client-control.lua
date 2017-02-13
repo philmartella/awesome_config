@@ -15,7 +15,8 @@ local tag = require("awful.tag")
 local beautiful = require("beautiful")
 
 local clientcontrol = {
-	widget = {}
+	widget = {},
+	filter = {}
 }
 
 --- Show tooltips when hover on client control buttons (defaults to 'true')
@@ -75,7 +76,7 @@ end
 
 local function new(screen, args, filter)
 	screen = get_screen(screen)
-	local filter = filter or awful.widget.tasklist.filter.currenttags
+	local filter = filter or clientcontrol.filter.currenttags
 	local args = args or {}
 	local sw = { widget = {} }
 
@@ -227,6 +228,11 @@ end
 
 function clientcontrol.unbind_all (w)
 	w:buttons(util.table.join())
+end
+
+function clientcontrol.filter.currenttags (c, s)
+	local s = s or awful.screen.focused()
+	return awful.widget.tasklist.filter.currenttags(c, s)
 end
 
 return setmetatable(clientcontrol, { __call = function(_, ...) return new(...) end})
