@@ -21,7 +21,7 @@ static char *floating_normal_active[] = {
 "XXXXXXX....XXXXXXX",
 "XXXXXXX....XXXXXXX",
 "XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
 "                  ",
-"                  ",
-"XXXXXXXXXXXXXXXXXX"
+"                  "
 };

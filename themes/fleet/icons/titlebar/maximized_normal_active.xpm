@@ -21,7 +21,7 @@ static char *maximized_normal_active[] = {
 "XXXXXXXXXXX....XXX",
 "XXXXXXXXXXX....XXX",
 "XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
 "                  ",
-"                  ",
-"XXXXXXXXXXXXXXXXXX"
+"                  "
 };

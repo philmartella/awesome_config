@@ -21,7 +21,7 @@ static char *floating_focus_active[] = {
 "XXXXXXX....XXXXXXX",
 "XXXXXXX....XXXXXXX",
 "XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
 "                  ",
-"                  ",
-"XXXXXXXXXXXXXXXXXX"
+"                  "
 };

@@ -724,10 +724,10 @@ awful.screen.connect_for_each_screen(function(s)
 			end
 		},
 		{
-			id = 'minimizedbutton',
+			id = 'minimizebutton',
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
-				local image = fleet.widget.client_control.button_img('minimized', c)
+				local image = fleet.widget.client_control.button_img('minimize', c)
 				if image then
 					w:set_image(image)
 				end
@@ -986,9 +986,7 @@ globalkeys = awful.util.table.join(
 	awful.key({ modkey, "Shift" }, "k", function () awful.client.swap.byidx(-1) end,
 	{description = "swap with previous client by index", group = "client"}),
 
-	--[[
-	awful.key({ modkey, "Control" }, "n",
-	function ()
+	awful.key({ modkey, "Control" }, "k", function ()
 		local c = awful.client.restore()
 
 		-- Focus restored client
@@ -998,7 +996,6 @@ globalkeys = awful.util.table.join(
 		end
 	end,
 	{description = "restore minimized", group = "client"}),
-	--]]
 
 	-- Menus
 	awful.key({ modkey }, "w", function () mymainmenu:show() end,
@@ -1113,20 +1110,17 @@ clientkeys = awful.util.table.join(
 	awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle,
 	{description = "toggle floating", group = "client"}),
 
-	--[[
-	awful.key({ modkey,           }, "n",
-	function (c)
+	awful.key({ modkey }, "k", function (c)
 	-- The client currently has the input focus, so it cannot be
 	-- minimized, since minimized clients can't have the focus.
 		c.minimized = true
 	end ,
 	{description = "minimize", group = "client"}),
-	--]]
 
 	awful.key({ modkey }, "m", function (c)
-			c.maximized = not c.maximized
-			c:raise()
-		end ,
+		c.maximized = not c.maximized
+		c:raise()
+	end ,
 	{description = "maximize", group = "client"}),
 
 	awful.key({ modkey }, "f", function (c)
@@ -1207,22 +1201,16 @@ awful.rules.rules = {
 				"dialog",
 			},
 			instance = {
-				"nitrogen",
-				"pavucontrol",
 				"gnome",
 				"eog",
 				"gpk",
 				"dconf",
-				"DTA", -- Firefox addon DownThemAll.
 				"copyq", -- Includes session name in class.
 			},
 			class = {
 				"Arandr",
-				"Gpick",
 				"Kruler",
 				"MessageWin", -- kalarm.
-				"Sxiv",
-				"Wpa_gui",
 				"pinentry",
 				"veromix",
 				"xtightvncviewer",
@@ -1231,15 +1219,8 @@ awful.rules.rules = {
 				"Wallp",
 				"Nautilus",
 			},
-			name = {
-				"Event Tester", -- xev.
-				"Blender User Preferences", -- blender.
-			},
 			role = {
-				"app", -- Chrome's app windows
 				"AlarmWindow", -- Thunderbird's calendar.
-				"pop-up", -- e.g. Google Chrome's (detached) Developer Tools.
-				"gimp-file-open",
 			}
 		},
 		properties = {
@@ -1253,23 +1234,42 @@ awful.rules.rules = {
 			instance = {
 				"nitrogen",
 				"pavucontrol",
-				"DTA",
 			},
 			class = {
 				"Arandr",
-				"Wpa_gui",
 			},
 			name = {
 				"Event Tester", -- xev.
-				"Blender User Preferences", -- blender.
 			},
-			role = {
-				"app",
-				"pop-up",
-			}
 		},
 		properties = {
 			titlebars_enabled = true
+		},
+	},
+
+	-- Floating centered titlebar clients
+	{ rule_any = {
+			instance = {
+				"DTA", -- Firefox addon DownThemAll.
+			},
+			class = {
+				"Gpick",
+				"Sxiv",
+				"Wpa_gui",
+			},
+			name = {
+				"Blender User Preferences",
+			},
+			role = {
+				"app", -- Chrome's app windows
+				"pop-up", -- Google Chrome's (detached) Developer Tools.
+				"gimp-file-open", -- Gimp open file dialog
+			}
+		},
+		properties = {
+			floating = true,
+			titlebars_enabled = true,
+			placement = awful.placement.centered
 		},
 	},
 }
@@ -1361,11 +1361,15 @@ client.connect_signal("mouse::enter", function(c)
 	end
 end)
 
+client.connect_signal("request::activate", function (c)
+	client.focus = c
+	c:raise()
+end)
 client.connect_signal("property::maximized_horizontal", adjust_client_border)
 client.connect_signal("property::maximized_vertical", adjust_client_border)
 client.connect_signal("property::minimized", adjust_client_border)
-client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
-client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+client.connect_signal("focus", function (c) c.border_color = beautiful.border_focus end)
+client.connect_signal("unfocus", function (c) c.border_color = beautiful.border_normal end)
 -- }}}
 
 -- {{{ Startup

@@ -21,7 +21,7 @@ static char *sticky_normal_active[] = {
 "XXX....XXXX....XXX",
 "XXX....XXXX....XXX",
 "XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
 "                  ",
-"                  ",
-"XXXXXXXXXXXXXXXXXX"
+"                  "
 };

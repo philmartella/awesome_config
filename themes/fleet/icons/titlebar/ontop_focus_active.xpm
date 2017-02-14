@@ -21,7 +21,7 @@ static char *ontop_focus_active[] = {
 "XXX....XXXX....XXX",
 "XXX....XXXX....XXX",
 "XXXXXXXXXXXXXXXXXX",
+"XXXXXXXXXXXXXXXXXX",
 "                  ",
-"                  ",
-"XXXXXXXXXXXXXXXXXX"
+"                  "
 };

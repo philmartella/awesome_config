@@ -58,7 +58,7 @@ theme.menu_submenu                          = nil
 --}}}
 
 --{{{ systray
-theme.bg_systray                            = "#31393E"
+theme.bg_systray                            = "#000000"
 theme.systray_icon_spacing                  = 4
 --}}}
 
