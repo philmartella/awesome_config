@@ -142,15 +142,19 @@ local function add_tag (s, nofocus)
 	if not nofocus then
 		t:view_only()
 	end
+
+	reicon_tags()
 end
 
-local function move_to_new_tag()
+local function move_to_new_tag ()
 	local c = client.focus
 	if not c then return end
 
 	local t = awful.tag.add(c.class,{screen= c.screen })
 	c:tags({t})
 	t:view_only()
+
+	reicon_tags()
 end
 
 local function copy_tag ()
@@ -159,57 +163,54 @@ local function copy_tag ()
 
 	local clients = t:clients()
 	local t2 = awful.tag.add(t.name, awful.tag.getdata(t))
+
 	t2:clients(clients)
 	t2:view_only()
+
+	reicon_tags()
 end
 
 local function delete_tag ()
 	local tags = awful.screen.focused().tags
 	local num_tags = #tags
 	local t = awful.screen.focused().selected_tag
+
 	if not t or 1 == num_tags then return end
+
 	t:delete()
 
-	for _, t in pairs(tags) do
-		if t.icon then
-			t.icon = beautiful.tag_icon[t.index] or nil
-		end
-	end
+	reicon_tags()
 end
 
 local function rename_tag ()
 	awful.prompt.run {
 		prompt       = "Tag Name: ",
 		textbox      = awful.screen.focused().mypromptbox.widget,
-		exe_callback = function(new_name)
-			if not new_name or #new_name == 0 then return end
-
+		exe_callback = function (new_name)
 			local t = awful.screen.focused().selected_tag
+
 			if t then
-				t.name = new_name
-				t.icon = beautiful.tag_icon[t.index] or nil
+				if not new_name or #new_name == 0 then
+					t.name = t.index
+					t.icon = nil
+				else
+					t.name = new_name
+					t.icon = beautiful.tag_icon[t.index] or nil
+				end
 			end
+
+			reicon_tags()
 		end}
 end
 
-local function rename_tag_dmenu ()
-	currScreen = awful.screen.focused().index or 1
-	currTag = awful.tag.getidx(awful.tag.selected())
-	currText = awful.tag.selected().name:gsub("^%s*(.-)%s*$", "%1")
-	currText = currText:gsub('%[' .. currTag .. '%]', '')
-	currText = currText:gsub("^%s*(.-)%s*$", "%1")
-
-	local dprompt = io.popen("echo "..currText.." | dmenu -m "..(currScreen - 1).." -fn 'Source Code Pro-14' -nb '#333333' -nf '#cccccc' -sb '#285577' -sf '#ffffff' -p 'Tag Name'", "r")
-	local dpromptOut = dprompt:read("*a"):gsub("^%s*(.-)%s*$", "%1")
-	dprompt:close()
-
-	if string.len(dpromptOut) == 0 then
-		tagName = ''.. currTag ..''
-		awful.tag.selected().name = tagName
-	else
-		tagName = '[' .. currTag .. '] ' .. dpromptOut .. ''
-		awful.tag.selected().name = tagName
-	end
+function reicon_tags ()
+	awful.screen.connect_for_each_screen(function (s)
+		for _, t in pairs(s.tags) do
+			if t.icon then
+				t.icon = beautiful.tag_icon[t.index] or nil
+			end
+		end
+	end)
 end
 
 local function set_wallpaper_beautiful (s)
@@ -883,9 +884,6 @@ clientbuttons = awful.util.table.join(
 -- {{{ Global key bindings
 globalkeys = awful.util.table.join(
 	-- Tag modification
-	awful.key({ modkey }, "F2", rename_tag,
-	{description = "Rename current tag", group = "tag"}),
-
 	awful.key({ modkey }, "a", add_tag,
 	{description = "add a tag", group = "tag"}),
 
