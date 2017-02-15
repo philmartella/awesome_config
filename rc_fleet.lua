@@ -134,9 +134,7 @@ local function add_tag (s, nofocus)
 
 	local t = awful.tag.add(idx, {
 		screen = s,
-		--icon = beautiful.tag_icon[idx] or nil,
     layout = awful.layout.suit.floating,
-    --selected = true,
 	})
 
 	if not nofocus then
@@ -1212,7 +1210,6 @@ awful.rules.rules = {
 				"pinentry",
 				"veromix",
 				"xtightvncviewer",
-				"MPlayer",
 				"Gtk-recordMyDesktop",
 				"Wallp",
 				"Nautilus",
@@ -1248,6 +1245,7 @@ awful.rules.rules = {
 	-- Floating centered titlebar clients
 	{ rule_any = {
 			instance = {
+				"seahorse",
 				"DTA", -- Firefox addon DownThemAll.
 			},
 			class = {
