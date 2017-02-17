@@ -44,7 +44,7 @@ end
 -- beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/fleet/theme.lua")
 
-terminal = "urxvt" or "terminology" or "gnome-terminal" or "xterm"
+terminal = "terminator" or "urxvt" or "terminology" or "gnome-terminal" or "xterm"
 editor = os.getenv("EDITOR") or "vim" or "vi" or "nano"
 
 editor_cmd = terminal .. " -e " .. editor
