@@ -184,6 +184,7 @@ theme.titlebar_floating_button_focus_inactive    = titlebar_icon_dir .. "floatin
 theme.titlebar_maximized_button_focus_inactive   = titlebar_icon_dir .. "maximized_focus_inactive.xpm"
 theme.titlebar_ontop_button_focus_inactive       = titlebar_icon_dir .. "ontop_focus_inactive.xpm"
 theme.titlebar_sticky_button_focus_inactive      = titlebar_icon_dir .. "sticky_focus_inactive.xpm"
+--}}}
 
 --{{{ tooltip
 theme.tooltip_border_color = nil

@@ -44,7 +44,7 @@ end
 -- beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/fleet/theme.lua")
 
-terminal = "terminator" or "urxvt" or "terminology" or "gnome-terminal" or "xterm"
+terminal = "urxvt" or "terminology" or "terminator" or "gnome-terminal" or "xterm"
 editor = os.getenv("EDITOR") or "vim" or "vi" or "nano"
 
 editor_cmd = terminal .. " -e " .. editor
@@ -243,7 +243,7 @@ local function adjust_client_border (c)
 end
 
 local function wrap_widget_vmargin (widget)
-	return wibox.container.margin(widget, 2, 2, 4, 4)
+	return wibox.container.margin(widget, 2, 2, 2, 2)
 end
 
 local function wrap_widget_hmargin (widget)
@@ -837,7 +837,7 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 30, ontop = true, bg = "#000000AA", screen = s })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 26, ontop = true, bg = "#000000AA", screen = s })
 
 		s.mybotwibox:setup {
 			{ -- Left widgets
@@ -1135,9 +1135,9 @@ clientkeys = awful.util.table.join(
 -- Bind keypad to move and resize client
 NumericPad = { "KP_End", "KP_Down", "KP_Next", "KP_Left", "KP_Begin", "KP_Right", "KP_Home", "KP_Up", "KP_Prior" }
 NumericPadMap = {
-	{-16,16,16,16,'left'}, {0,16,0,16,'down'}, {16,16,16,16,'right'},
-	{-16,0,16,0,'left'}, {0,0,0,0,'none'}, {16,0,16,0,'right'},
-	{-16,-16,16,16,'left'}, {0,-16,0,16,'up'}, {16,-16,16,16,'right'}
+	{-20,20,20,20,'left'}, {0,20,0,20,'down'}, {20,20,20,20,'right'},
+	{-20,0,20,0,'left'}, {0,0,0,0,'none'}, {20,0,20,0,'right'},
+	{-20,-20,20,20,'left'}, {0,-20,0,20,'up'}, {20,-20,20,20,'right'}
 }
 
 for i = 1, 9 do
