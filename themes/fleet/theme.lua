@@ -29,7 +29,7 @@ theme.border_focus                          = "#0099CC"
 theme.border_marked                         = nil
 theme.border_width                          = 1
 theme.useless_gap                           = 0
-theme.gap_single_client                     = false
+theme.gap_single_client                     = true
 theme.column_count                          = nil
 --}}}
 
