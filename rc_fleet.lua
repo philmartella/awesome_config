@@ -243,7 +243,7 @@ local function adjust_client_border (c)
 end
 
 local function wrap_widget_vmargin (widget)
-	return wibox.container.margin(widget, 2, 2, 2, 2)
+	return wibox.container.margin(widget, 2, 2, 2, 0)
 end
 
 local function wrap_widget_hmargin (widget)
@@ -837,7 +837,7 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 26, ontop = true, bg = "#000000AA", screen = s })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 24, ontop = true, bg = "#000000AA", screen = s })
 
 		s.mybotwibox:setup {
 			{ -- Left widgets
