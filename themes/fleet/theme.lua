@@ -39,7 +39,7 @@ theme.cursor_mouse_move                     = nil
 --}}}
 
 --{{{ snap
-theme.snap_bg                               = "#0099CC77"
+theme.snap_bg                               = "#0099CC"
 theme.snap_border_width                     = 10
 theme.snap_shape                            = nil
 --}}}

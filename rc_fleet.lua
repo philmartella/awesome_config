@@ -1358,7 +1358,6 @@ client.connect_signal("mouse::enter", function(c)
 end)
 
 client.connect_signal("request::activate", function (c)
-	client.focus = c
 	c:raise()
 end)
 client.connect_signal("property::maximized_horizontal", adjust_client_border)
