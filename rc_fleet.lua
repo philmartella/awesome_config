@@ -235,7 +235,9 @@ local function set_wallpaper(s)
 end
 
 local function adjust_client_border (c)
-	if c.maximized_horizontal == true and c.maximized_vertical == true then
+	if c.maximized == true then
+		c.border_width = 0
+	elseif c.maximized_horizontal == true and c.maximized_vertical == true then
 		c.border_width = 0
 	else
 		c.border_width = beautiful.border_width
