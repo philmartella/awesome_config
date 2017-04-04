@@ -708,15 +708,14 @@ awful.screen.connect_for_each_screen(function(s)
 			id = 'maximizedbutton',
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
-				local state = c.maximized_horizontal or c.maximized_vertical
+				local state = c.maximized or c.maximized_horizontal or c.maximized_vertical
 				local image = fleet.widget.client_control.button_img('maximized', c)
 				if image then
 					w:set_image(image)
 				end
 
 				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function ()
-					c.maximized_horizontal = not state
-					c.maximized_vertical = not state
+					c.maximized = not state
 				end))
 			end,
 			reset = function (w)
@@ -1222,7 +1221,9 @@ awful.rules.rules = {
 		},
 		properties = {
 			floating = true,
-			placement = awful.placement.centered
+			placement = awful.placement.centered,
+			border_width = beautiful.border_width,
+			border_color = beautiful.border_normal
 		},
 	},
 
@@ -1362,11 +1363,9 @@ end)
 client.connect_signal("request::activate", function (c)
 	c:raise()
 end)
-client.connect_signal("property::maximized_horizontal", adjust_client_border)
-client.connect_signal("property::maximized_vertical", adjust_client_border)
-client.connect_signal("property::minimized", adjust_client_border)
 client.connect_signal("focus", function (c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function (c) c.border_color = beautiful.border_normal end)
+client.connect_signal("property::size", adjust_client_border)
 -- }}}
 
 -- {{{ Startup
