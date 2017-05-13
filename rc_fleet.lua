@@ -708,14 +708,15 @@ awful.screen.connect_for_each_screen(function(s)
 			id = 'maximizedbutton',
 			widget = wibox.widget.imagebox(beautiful.none_normal),
 			update = function (w, c)
-				local state = c.maximized or c.maximized_horizontal or c.maximized_vertical
+				local state = c.maximized
 				local image = fleet.widget.client_control.button_img('maximized', c)
 				if image then
 					w:set_image(image)
 				end
 
 				fleet.widget.client_control.bind_focus(c, w, awful.button({}, 1, nil, function ()
-					c.maximized = not state
+					c.maximized = not c.maximized
+					c:raise()
 				end))
 			end,
 			reset = function (w)
