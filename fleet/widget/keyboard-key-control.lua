@@ -37,7 +37,8 @@ local function get_markup (bg, fg, name, strike)
 		strikethrough = 'strikethrough="true"'
 	end
 
-	return '<span background="'..bg..'" color="'..fg..'" '..strikethrough..'>'..name..'</span>'
+--	return '<span background="'..bg..'" color="'..fg..'" '..strikethrough..'>'..name..'</span>'
+	return '<span background="'..bg..'" color="'..fg..'">'..name..'</span>'
 end
 
 local function sleep (a)

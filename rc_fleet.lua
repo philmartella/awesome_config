@@ -271,6 +271,11 @@ mysysmenu = {
 	{ "poweroff", "systemctl poweroff"}
 }
 
+myawmenu = {
+	{ "restart", function() awesome.restart() end },
+	{ "quit", function() awesome.quit() end}
+}
+
 mywmmenu = {
 	{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end },
 	{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
@@ -295,8 +300,7 @@ mymainmenu = awful.menu({
 mysessionmenu = awful.menu({
 	items = {
 		{ "lock", lockscreen_cmd },
-		{ "restart", function() awesome.restart() end },
-		{ "quit", function() awesome.quit() end},
+		{ "session", myawmenu },
 		{ "system", mysysmenu },
 	}
 })
