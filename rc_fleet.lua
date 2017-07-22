@@ -1226,9 +1226,7 @@ awful.rules.rules = {
 		},
 		properties = {
 			floating = true,
-			placement = awful.placement.centered,
-			border_width = beautiful.border_width,
-			border_color = beautiful.border_normal
+			placement = awful.placement.centered
 		},
 	},
 
@@ -1260,6 +1258,8 @@ awful.rules.rules = {
 				"Gpick",
 				"Sxiv",
 				"Wpa_gui",
+				"MPlayer",
+				"vdpau"
 			},
 			name = {
 				"Blender User Preferences",
