@@ -241,12 +241,16 @@ local function adjust_client_border (c)
 	end
 end
 
-local function wrap_widget_vmargin (widget)
+local function wrap_widget_margin (widget)
 	return wibox.container.margin(widget, 2, 2, 2, 2)
 end
 
+local function wrap_widget_vmargin (widget)
+	return wibox.container.margin(widget, 0, 0, 2, 2)
+end
+
 local function wrap_widget_hmargin (widget)
-	return wibox.container.margin(widget, 4, 4, 2, 2)
+	return wibox.container.margin(widget, 2, 2, 0, 0)
 end
 
 local function wrap_widget_trans (widget)
@@ -255,7 +259,7 @@ end
 
 local function wrap_widget (widget)
 	local bg = beautiful.bg_normal
-	return wrap_widget_vmargin(wibox.container.background(wrap_widget_hmargin(widget), bg))
+	return wrap_widget_margin(wibox.container.background(wrap_widget_margin(wrap_widget_hmargin(widget)), bg))
 end
 
 -- }}}
@@ -825,10 +829,10 @@ awful.screen.connect_for_each_screen(function(s)
 			wrap_widget_vmargin(bar),
 			wrap_widget_vmargin(kbdleds.widget),
 			wrap_widget_vmargin(bar),
-			wrap_widget_hmargin(s.mytaglist),
+			wrap_widget_margin(s.mytaglist),
 			wrap_widget_vmargin(bar),
-			wrap_widget_hmargin(s.mylayoutbox),
-			wrap_widget_hmargin(s.mypromptbox),
+			wrap_widget_margin(s.mylayoutbox),
+			wrap_widget_margin(s.mypromptbox),
 			layout = wibox.layout.fixed.horizontal
 		},
 		nil,
@@ -844,7 +848,7 @@ awful.screen.connect_for_each_screen(function(s)
 			{ -- Left widgets
 			--	wrap_widget_trans(keyboardwidget),
 				wrap_widget_trans(volumewidget),
-				wrap_widget_vmargin(wibox.widget.systray()),
+				wrap_widget_margin(wibox.widget.systray()),
 				layout = wibox.layout.fixed.horizontal
 			},
 			{ -- Middle widgets
