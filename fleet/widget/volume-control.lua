@@ -56,13 +56,13 @@ function vcontrol.new(args)
     sw.widget = wibox.widget({
 			max_value = 101,
 			value = 0,
-			forced_height = 16,
+			forced_height = 18,
 			forced_width = 80,
-			paddings = 1,
-			border_width = 1,
+			paddings = 0,
+			border_width = 0,
 			margins = {
-				top = 2,
-				bottom = 2,
+				top = 8,
+				bottom = 8,
 			},
 			widget = wibox.widget.progressbar
 		})
@@ -109,22 +109,22 @@ function vcontrol:update(status)
     status = string.match(status, "%[(o[^%]]*)%]")
 
     if string.find(status, "on", 1, true) then
-        --self.widget.color = '#81B7E1'
-				self.widget.color = {
-					type="linear",
-					from = {0, 0},
-					to = {80, 0},
-					stops = {
-						{0, "#8AE181"},
-						{0.40, "#8AE181"},
-						{0.41, "#E1C381"},
-						{0.70, "#E1C381"},
-						{0.71, "#E18181"},
-						{1.0, "#E18181"}
-					}
-				}
+        self.widget.color = '#8AE181FF'
+				--self.widget.color = {
+				--	type="linear",
+				--	from = {0, 0},
+				--	to = {80, 0},
+				--	stops = {
+				--		{0, "#8AE181"},
+				--		{0.40, "#8AE181"},
+				--		{0.41, "#E1C381"},
+				--		{0.70, "#E1C381"},
+				--		{0.71, "#E18181"},
+				--		{1.0, "#E18181"}
+				--	}
+				--}
     else
-        self.widget.color = '#222222'
+        self.widget.color = '#AAAAAAFF'
     end
 
     self.widget:set_value(tonumber(volume))

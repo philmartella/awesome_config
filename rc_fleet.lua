@@ -51,9 +51,6 @@ editor_cmd = terminal .. " -e " .. editor
 lockscreen_cmd = "xlock -mode space"
 
 screenshot = "gnome-screenshot -i"
-filemanager = "nautilus" or "pcmanfm"
-browser = "chromium" or "firefox" or "opera" or "surf" or "dwb" or "netsurf"
-email = "xdg-email"
 
 -- Default modkey.
 modkey = "Mod4"
@@ -245,17 +242,22 @@ local function adjust_client_border (c)
 end
 
 local function wrap_widget_vmargin (widget)
-	return wibox.container.margin(widget, 2, 2, 2, 0)
+	return wibox.container.margin(widget, 2, 2, 2, 2)
 end
 
 local function wrap_widget_hmargin (widget)
 	return wibox.container.margin(widget, 4, 4, 2, 2)
 end
 
+local function wrap_widget_trans (widget)
+	return wibox.container.margin(widget, 4, 4, 4, 4)
+end
+
 local function wrap_widget (widget)
 	local bg = beautiful.bg_normal
 	return wrap_widget_vmargin(wibox.container.background(wrap_widget_hmargin(widget), bg))
 end
+
 -- }}}
 
 -- {{{ Menu
@@ -271,7 +273,7 @@ mysysmenu = {
 	{ "poweroff", "systemctl poweroff"}
 }
 
-myawmenu = {
+mysessmenu = {
 	{ "restart", function() awesome.restart() end },
 	{ "quit", function() awesome.quit() end}
 }
@@ -281,26 +283,18 @@ mywmmenu = {
 	{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
 	{ "toggle bottom wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mybotwibox}) end },
 	{ "change wallpaper", "nitrogen" },
-	{ "take screenshot", screenshot },
 	{ "lock screen", lockscreen_cmd },
 }
 
 mymainmenu = awful.menu({
 	items = {
+		{ "lock screen", lockscreen_cmd },
+		{ "take screenshot", screenshot },
 		{ "open terminal", terminal },
-		{ "open editor", editor_cmd },
-		{ "open files", filemanager },
-		{ "open browser", browser },
-		{ "send email", email },
 		{ "desktop", mywmmenu },
-		{ "awesome", myawesomemenu, beautiful.awesome_icon },
-	}
-})
-
-mysessionmenu = awful.menu({
-	items = {
-		{ "lock", lockscreen_cmd },
-		{ "session", myawmenu },
+	--	{ "awesome", myawesomemenu, beautiful.awesome_icon },
+		{ "awesome", myawesomemenu },
+		{ "session", mysessmenu },
 		{ "system", mysysmenu },
 	}
 })
@@ -312,11 +306,6 @@ myrootmenu = awful.menu({
 mylauncher = awful.widget.launcher({
 	image = beautiful.awesome_icon,
 	menu = mymainmenu
-})
-
-mysesslauncher = awful.widget.launcher({
-	image = beautiful.power_icon,
-	menu = mysessionmenu
 })
 
 -- Menubar configuration
@@ -331,9 +320,9 @@ bar:set_image(beautiful.bar)
 
 -- Keyboard map indicator and switcher
 kbdlayout = fleet.widget.keyboard_layout_control({
-	{ name = "cm", layout = "us", variant = "colemak" },
-	{ name = "dv", layout = "us", variant = "dvorak" },
-	{ name = "us", layout = "us", variant = nil }
+	{ name = "CO", layout = "us", variant = "colemak" },
+	{ name = "DV", layout = "us", variant = "dvorak" },
+	{ name = "US", layout = "us", variant = nil }
 })
 
 kbdleds = fleet.widget.keyboard_key_control({
@@ -354,18 +343,31 @@ kbdkeys = fleet.widget.keyboard_key_control({
 --]]
 
 keyboardwidget = wibox.widget {
-	{
-		image = beautiful.keyboard_icon,
-		widget = wibox.widget.imagebox,
-	},
-	bar,
-	kbdlayout.widget,
-	bar,
-	kbdleds.widget,
+--	{
+--		image = beautiful.keyboard_icon,
+--		widget = wibox.widget.imagebox,
+--	},
+--	bar,
+--	kbdlayout.widget,
+--	bar,
+--	kbdleds.widget,
 --	bar,
 --	kbdkeys.widget,
 	layout = wibox.layout.fixed.horizontal
 }
+-- Volume control
+volumecontrol = fleet.widget.volume_control({channel="Master"})
+
+volumewidget = wibox.widget {
+	{
+		image = beautiful.mpd_icon,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	volumecontrol.widget,
+	layout = wibox.layout.fixed.horizontal
+}
+
 
 -- Date
 datewidget = wibox.widget {
@@ -398,19 +400,6 @@ timewidget = wibox.widget {
 }
 
 vicious.register(timewidget.time, vicious.widgets.date, '%H:%M', 60)
-
--- Volume control
-volumecontrol = fleet.widget.volume_control({channel="Master"})
-
-volumewidget = wibox.widget {
-	{
-		image = beautiful.mpd_icon,
-		widget = wibox.widget.imagebox,
-	},
-	bar,
-	volumecontrol.widget,
-	layout = wibox.layout.fixed.horizontal
-}
 
 -- CPU
 cpuwidget = wibox.widget {
@@ -830,8 +819,14 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Add widgets to the wibox
 	s.mywibox:setup {
 		{ -- Left widgets
+			wrap_widget_vmargin(mylauncher),
+			wrap_widget_vmargin(bar),
+			wrap_widget_vmargin(kbdlayout.widget),
+			wrap_widget_vmargin(bar),
+			wrap_widget_vmargin(kbdleds.widget),
+			wrap_widget_vmargin(bar),
 			wrap_widget_hmargin(s.mytaglist),
-			wrap_widget_hmargin(bar),
+			wrap_widget_vmargin(bar),
 			wrap_widget_hmargin(s.mylayoutbox),
 			wrap_widget_hmargin(s.mypromptbox),
 			layout = wibox.layout.fixed.horizontal
@@ -843,14 +838,12 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 24, ontop = true, bg = "#000000AA", screen = s })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 26, ontop = true, bg = "#000000AA", screen = s, visible = false })
 
 		s.mybotwibox:setup {
 			{ -- Left widgets
-				wrap_widget(mylauncher),
-				wrap_widget(mysesslauncher),
-				wrap_widget(keyboardwidget),
-				wrap_widget(volumewidget),
+			--	wrap_widget_trans(keyboardwidget),
+				wrap_widget_trans(volumewidget),
 				wrap_widget_vmargin(wibox.widget.systray()),
 				layout = wibox.layout.fixed.horizontal
 			},
