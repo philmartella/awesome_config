@@ -808,7 +808,7 @@ awful.screen.connect_for_each_screen(function(s)
 				s.clientcontrols.widget.maximizedbutton,
 				s.clientcontrols.widget.stickybutton,
 				s.clientcontrols.widget.ontopbutton,
-				spacing = 8,
+				spacing = 4,
 				layout = wibox.layout.fixed.horizontal
 			},
 			bar,
@@ -836,7 +836,7 @@ awful.screen.connect_for_each_screen(function(s)
 			layout = wibox.layout.fixed.horizontal
 		},
 		nil,
-		wrap_widget_hmargin(s.myclientcontrol),
+		wrap_widget_vmargin(s.myclientcontrol),
 		layout = wibox.layout.align.horizontal
 	}
 
