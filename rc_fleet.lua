@@ -290,16 +290,29 @@ mywmmenu = {
 	{ "lock screen", lockscreen_cmd },
 }
 
+mymonitormenu = awful.menu({});
+
+awful.screen.connect_for_each_screen(function(s)
+	mymonitormenu.add(awful.menu({
+		title = "screen " .. s.index,
+		items = {
+			{ "rotate right", function () end },
+			{ "rotate left", function () end }
+		}
+	}))
+end)
+
 mymainmenu = awful.menu({
 	items = {
-		{ "lock screen", lockscreen_cmd },
-		{ "take screenshot", screenshot },
-		{ "open terminal", terminal },
-		{ "desktop", mywmmenu },
-	--	{ "awesome", myawesomemenu, beautiful.awesome_icon },
 		{ "awesome", myawesomemenu },
+		{ "desktop", mywmmenu },
+		{ "monitor", mymonitormenu },
+	--	{ "awesome", myawesomemenu, beautiful.awesome_icon },
 		{ "session", mysessmenu },
 		{ "system", mysysmenu },
+		{ "open terminal", terminal },
+		{ "take screenshot", screenshot },
+		{ "lock screen", lockscreen_cmd },
 	}
 })
 
@@ -324,14 +337,14 @@ bar:set_image(beautiful.bar)
 
 -- Keyboard map indicator and switcher
 kbdlayout = fleet.widget.keyboard_layout_control({
-	{ name = "CO", layout = "us", variant = "colemak" },
-	{ name = "DV", layout = "us", variant = "dvorak" },
-	{ name = "US", layout = "us", variant = nil }
+	{ name = "ENG CO", layout = "us", variant = "colemak" },
+	{ name = "ENG DV", layout = "us", variant = "dvorak" },
+	{ name = "ENG US", layout = "us", variant = nil }
 })
 
 kbdleds = fleet.widget.keyboard_key_control({
 	led_on = '#8AE181',
-	position = 'bottom_left',
+	position = 'top_left',
 	keys = {
 		{ name = ' 1 ', key = 'Num_Lock', led = 'Num Lock' },
 		{ name = ' A ', key = 'Caps_Lock', led = 'Caps Lock' }
@@ -799,8 +812,8 @@ awful.screen.connect_for_each_screen(function(s)
 	})
 
 	s.myclientcontrol = wibox.widget {
-		wibox.container.margin(s.clientcontrols.widget.icon, 4, 4, 0, 0),
-		wibox.container.margin(s.clientcontrols.widget.title, 4, 4, 0, 0),
+		wrap_widget_hmargin(s.clientcontrols.widget.icon),
+		wrap_widget_hmargin(s.clientcontrols.widget.title),
 		{
 			bar,
 			{
@@ -813,7 +826,8 @@ awful.screen.connect_for_each_screen(function(s)
 			},
 			bar,
 			s.clientcontrols.widget.closebutton,
-			spacing = 4,
+			wrap_widget_hmargin(nil),
+			spacing = 0,
 			layout = wibox.layout.fixed.horizontal
 		},
 		buttons = tasklist_buttons,
@@ -823,9 +837,8 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Add widgets to the wibox
 	s.mywibox:setup {
 		{ -- Left widgets
+			wrap_widget_hmargin(nil),
 			wrap_widget_vmargin(mylauncher),
-			wrap_widget_vmargin(bar),
-			wrap_widget_vmargin(kbdlayout.widget),
 			wrap_widget_vmargin(bar),
 			wrap_widget_vmargin(kbdleds.widget),
 			wrap_widget_vmargin(bar),
@@ -847,6 +860,8 @@ awful.screen.connect_for_each_screen(function(s)
 		s.mybotwibox:setup {
 			{ -- Left widgets
 			--	wrap_widget_trans(keyboardwidget),
+				wrap_widget_vmargin(kbdlayout.widget),
+				wrap_widget_vmargin(bar),
 				wrap_widget_trans(volumewidget),
 				wrap_widget_margin(wibox.widget.systray()),
 				layout = wibox.layout.fixed.horizontal
@@ -1019,7 +1034,8 @@ globalkeys = awful.util.table.join(
 	{description = "lua execute prompt", group = "awesome"}),
 
 	awful.key({ modkey }, "b", function () fleet.layout.toggle_wibox({
-		awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end,
+		awful.screen.focused().mybotwibox
+	}) end,
 	{description = "hide the wibars", group = "layout"}),
 
 	-- Help window
