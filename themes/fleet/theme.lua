@@ -274,6 +274,7 @@ theme.slider_bar_color = nil
 theme.awesome_icon                               = widget_icon_dir .. "awesome_icon.xpm"
 theme.application_icon                           = widget_icon_dir .. "application_icon.xpm"
 theme.power_icon                                 = widget_icon_dir .. "power.xpm"
+theme.session_icon                               = widget_icon_dir .. "session.xpm"
 theme.keyboard_icon								               = widget_icon_dir .. "keyboard.xpm"
 theme.mpd_icon                                   = widget_icon_dir .. "mpd.xpm"
 theme.mpd_on_icon                                = widget_icon_dir .. "mpd_on.xpm"

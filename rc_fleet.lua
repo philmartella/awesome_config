@@ -326,7 +326,7 @@ myrootmenu = awful.menu({
 })
 
 mysesslauncher = awful.widget.launcher({
-	image = beautiful.power_icon,
+	image = beautiful.session_icon,
 	menu = myssmenu
 })
 
@@ -1219,9 +1219,21 @@ awful.rules.rules = {
 			keys = clientkeys,
 			buttons = clientbuttons,
 			screen = awful.screen.preferred,
+			size_hints_honor = true,
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen,
 			titlebars_enabled = false
 		}
+	},
+
+	-- No size hints clients
+	{ rule_any = {
+			class = {
+				"URxvt",
+			}
+		},
+		properties = {
+			size_hints_honor = false
+		},
 	},
 
 	-- Floating and Centered clients.
