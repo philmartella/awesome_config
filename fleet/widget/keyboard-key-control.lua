@@ -30,7 +30,7 @@ local function argv(...)
     return table.concat({arg(...)}, " ")
 end
 
-local function get_markup (bg, fg, name, strike)
+local function get_markup (font, bg, fg, name, strike)
 	local strikethrough = ''
 
 	if strike then
@@ -38,7 +38,7 @@ local function get_markup (bg, fg, name, strike)
 	end
 
 --	return '<span background="'..bg..'" color="'..fg..'" '..strikethrough..'>'..name..'</span>'
-	return '<span background="'..bg..'" color="'..fg..'">'..name..'</span>'
+	return '<span font="'..font..'" background="'..bg..'" color="'..fg..'">'..name..'</span>'
 end
 
 local function sleep (a)
@@ -79,7 +79,7 @@ function kcontrol:update_led_status(name, key, led, led_status, silent)
 			strike = true
 		end
 
-		self.keywidgets[key]:set_markup(get_markup(self.bg, self.led_status[led_status], name, strike))
+		self.keywidgets[key]:set_markup(get_markup(self.font, self.bg, self.led_status[led_status], name, strike))
 	end
 end
 
@@ -88,7 +88,7 @@ function kcontrol:add_key (name, key, led, nospacing)
 
 	self.keywidgets[key] = wibox.widget.textbox()
 
-	self.keywidgets[key]:set_markup(get_markup(self.bg, self.fg, name))
+	self.keywidgets[key]:set_markup(get_markup(self.font, self.bg, self.fg, name))
 
 	self.keywidgets[key]:buttons(awful.util.table.join(
 		awful.button({ }, 1, function() self:toggle_key(key) end),
@@ -118,6 +118,7 @@ function kcontrol.new(args)
 	sw.spacing = args.spacing or "5"
 	sw.bg = args.bg or "#222222"
 	sw.fg = args.fg or "#FFFFFF"
+	sw.font = args.font or "Monospace"
 
 	sw.led_status = {}
 	sw.led_status['on'] = args.led_on or "#00FF00"

@@ -63,10 +63,10 @@ end
 
 function indicator:update()
 	-- update layoutwidget text
-	local text = "" .. self.current.name .. ""
+	local text = ""..self.current.name..""
 
 	if self.current.color and self.current.color ~= nil then
-		local w_markup = '<span color="' .. self.current.color .. '">' .. text ..'</span>'
+		local w_markup = '<span color="'..self.current.color..'">'..text..'</span>'
 		self.layoutwidget:set_markup(w_markup)
 	else
 		self.layoutwidget:set_text(text)

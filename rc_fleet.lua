@@ -290,8 +290,27 @@ mywmmenu = {
 	{ "lock screen", lockscreen_cmd },
 }
 
-mymonitormenu = awful.menu({});
+myssmenu = awful.menu({
+	items = {
+		{ "session", mysessmenu },
+		{ "system", mysysmenu },
+		{ "lock screen", lockscreen_cmd }
+	}
+})
 
+mymainmenu = awful.menu({
+	items = {
+		{ "awesome", myawesomemenu },
+		{ "desktop", mywmmenu },
+		{ "monitor", mymonitormenu },
+	--	{ "awesome", myawesomemenu, beautiful.awesome_icon },
+		{ "open terminal", terminal },
+		{ "take screenshot", screenshot }
+	}
+})
+
+-- Generated Menus
+mymonitormenu = awful.menu({});
 awful.screen.connect_for_each_screen(function(s)
 	mymonitormenu.add(awful.menu({
 		title = "screen " .. s.index,
@@ -302,22 +321,13 @@ awful.screen.connect_for_each_screen(function(s)
 	}))
 end)
 
-mymainmenu = awful.menu({
-	items = {
-		{ "awesome", myawesomemenu },
-		{ "desktop", mywmmenu },
-		{ "monitor", mymonitormenu },
-	--	{ "awesome", myawesomemenu, beautiful.awesome_icon },
-		{ "session", mysessmenu },
-		{ "system", mysysmenu },
-		{ "open terminal", terminal },
-		{ "take screenshot", screenshot },
-		{ "lock screen", lockscreen_cmd },
-	}
-})
-
 myrootmenu = awful.menu({
 	items = mywmmenu
+})
+
+mysesslauncher = awful.widget.launcher({
+	image = beautiful.power_icon,
+	menu = myssmenu
 })
 
 mylauncher = awful.widget.launcher({
@@ -337,9 +347,9 @@ bar:set_image(beautiful.bar)
 
 -- Keyboard map indicator and switcher
 kbdlayout = fleet.widget.keyboard_layout_control({
-	{ name = "ENG CO", layout = "us", variant = "colemak" },
-	{ name = "ENG DV", layout = "us", variant = "dvorak" },
-	{ name = "ENG US", layout = "us", variant = nil }
+	{ name = "CO", layout = "us", variant = "colemak" },
+	{ name = "DV", layout = "us", variant = "dvorak" },
+	{ name = "US", layout = "us", variant = nil }
 })
 
 kbdleds = fleet.widget.keyboard_key_control({
@@ -380,7 +390,7 @@ volumewidget = wibox.widget {
 		image = beautiful.mpd_icon,
 		widget = wibox.widget.imagebox,
 	},
-	bar,
+	wrap_widget_hmargin(nil),
 	volumecontrol.widget,
 	layout = wibox.layout.fixed.horizontal
 }
@@ -839,6 +849,8 @@ awful.screen.connect_for_each_screen(function(s)
 		{ -- Left widgets
 			wrap_widget_hmargin(nil),
 			wrap_widget_vmargin(mylauncher),
+			wrap_widget_hmargin(nil),
+			wrap_widget_vmargin(mysesslauncher),
 			wrap_widget_vmargin(bar),
 			wrap_widget_vmargin(kbdleds.widget),
 			wrap_widget_vmargin(bar),
@@ -860,9 +872,11 @@ awful.screen.connect_for_each_screen(function(s)
 		s.mybotwibox:setup {
 			{ -- Left widgets
 			--	wrap_widget_trans(keyboardwidget),
-				wrap_widget_vmargin(kbdlayout.widget),
-				wrap_widget_vmargin(bar),
+				wrap_widget_hmargin(nil),
+				wrap_widget_trans(kbdlayout.widget),
+				wrap_widget_vmargin(wrap_widget_vmargin(bar)),
 				wrap_widget_trans(volumewidget),
+				wrap_widget_vmargin(wrap_widget_vmargin(bar)),
 				wrap_widget_margin(wibox.widget.systray()),
 				layout = wibox.layout.fixed.horizontal
 			},
