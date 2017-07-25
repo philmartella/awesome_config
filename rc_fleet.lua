@@ -1370,15 +1370,15 @@ client.connect_signal("request::titlebars", function(c)
 		},
 		control = wibox.widget {
 			{
-				wrap_widget_margin(awful.titlebar.widget.floatingbutton(c)),
-				wrap_widget_margin(awful.titlebar.widget.maximizedbutton(c)),
-				wrap_widget_margin(awful.titlebar.widget.stickybutton(c)),
-				wrap_widget_margin(awful.titlebar.widget.ontopbutton(c)),
-				spacing = 0,
+				wrap_widget_vmargin(awful.titlebar.widget.floatingbutton(c)),
+				wrap_widget_vmargin(awful.titlebar.widget.maximizedbutton(c)),
+				wrap_widget_vmargin(awful.titlebar.widget.stickybutton(c)),
+				wrap_widget_vmargin(awful.titlebar.widget.ontopbutton(c)),
+				spacing = 4,
 				layout = wibox.layout.fixed.horizontal()
 			},
 			wrap_widget_vmargin(bar),
-			wrap_widget_margin(awful.titlebar.widget.closebutton(c)),
+			wrap_widget_vmargin(awful.titlebar.widget.closebutton(c)),
 			layout = wibox.layout.fixed.horizontal()
 		},
 	}
