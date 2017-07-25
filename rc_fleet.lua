@@ -259,7 +259,7 @@ end
 
 local function wrap_widget_light (w)
 	return  wrap_widget_margin(wibox.widget {
-			w,
+			wrap_widget_hmargin(w),
 			shape = gears.shape.rectangle,
 			shape_border_color = "#777777",
 			shape_border_width = 1,
