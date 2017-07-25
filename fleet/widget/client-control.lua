@@ -234,5 +234,13 @@ function clientcontrol.filter.currenttags (c, s)
 	return awful.widget.tasklist.filter.currenttags(c, s)
 end
 
+function clientcontrol.filter.currenttagsnotfocused (c, s)
+	local client = awful.client.focus.history.get(s, 0)
+
+	if c == client then return false end
+
+	return awful.widget.tasklist.filter.currenttags(c, s)
+end
+
 return setmetatable(clientcontrol, { __call = function(_, ...) return new(...) end})
 

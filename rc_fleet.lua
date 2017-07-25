@@ -259,23 +259,37 @@ end
 
 local function wrap_widget_light (w)
 	return  wrap_widget_margin(wibox.widget {
-			wrap_widget_hmargin(w),
-			shape = gears.shape.rectangle,
-			shape_border_color = "#777777",
-			shape_border_width = 1,
-			bg = beautiful.bg_widget,
-			widget = wibox.container.background
+		{
+			w,
+			left = 2,
+			right = 2,
+			top = 2,
+			bottom = 2,
+			widget = wibox.container.margin
+		},
+		shape = gears.shape.rectangle,
+		shape_border_color = "#777777",
+		shape_border_width = 1,
+		bg = beautiful.bg_widget,
+		widget = wibox.container.background
 	})
 end
 
 local function wrap_widget (w)
 	return  wrap_widget_margin(wibox.widget {
+		{
 			wrap_widget_margin(wrap_widget_hmargin(w)),
-			shape = gears.shape.rectangle,
-			shape_border_color = "#777777",
-			shape_border_width = 1,
-			bg = beautiful.bg_widget,
-			widget = wibox.container.background
+			left = 2,
+			right = 2,
+			top = 2,
+			bottom = 2,
+			widget = wibox.container.margin
+		},
+		shape = gears.shape.rectangle,
+		shape_border_color = "#777777",
+		shape_border_width = 1,
+		bg = beautiful.bg_widget,
+		widget = wibox.container.background
 	})
 	-- return wrap_widget_margin(wibox.container.background(wrap_widget_margin(wrap_widget_hmargin(widget)), bg))
 end
@@ -653,7 +667,6 @@ local taglist_buttons = awful.util.table.join(
 
 -- Tasklist
 local tasklist_buttons = awful.util.table.join(
---[[
 	awful.button({ }, 1, function (c)
 		if c == client.focus then
 			c.minimized = true
@@ -669,8 +682,10 @@ local tasklist_buttons = awful.util.table.join(
 			client.focus = c
 			c:raise()
 		end
-	end),
---]]
+	end)
+)
+
+local taskalt_buttons = awful.util.table.join(
 	awful.button({ }, 3, client_menu_toggle_fn()),
 	awful.button({ }, 4, function ()
 		awful.client.focus.byidx(1)
@@ -704,7 +719,9 @@ awful.screen.connect_for_each_screen(function(s)
 	s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons, {spacing = 4})
 
 	-- Create a tasklist widget
-	--s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {})
+	s.mytasklist = awful.widget.tasklist(s, fleet.widget.client_control.filter.currenttagsnotfocused, tasklist_buttons, {
+		disable_task_name = true
+	})
 
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, bg = "#000000AA", screen = s })
@@ -819,9 +836,11 @@ awful.screen.connect_for_each_screen(function(s)
 				local color = fleet.widget.client_control.fg_color(c)
 
 				w:set_markup('<span foreground="'..color..'">'..name..'</span>')
+				fleet.widget.client_control.bind_focus(c, w, tasklist_buttons)
 			end,
 			reset = function (w)
 				w:set_markup('<span color="red">~</span>')
+				fleet.widget.client_control.unbind_all(w)
 			end
 		},
 		{
@@ -841,10 +860,19 @@ awful.screen.connect_for_each_screen(function(s)
 	})
 
 	s.myclientcontrol = wibox.widget {
-		wibox.container.margin(s.clientcontrols.widget.icon, 2, 2, 1, 1),
-		wibox.container.margin(s.clientcontrols.widget.title, 2, 2, 1, 1),
 		{
+			nil,
+			wibox.container.margin(s.mytasklist, 2, 2, 1, 1),
+			nil,
+			layout = wibox.layout.align.horizontal
+		},
+		{
+			wibox.container.margin(s.clientcontrols.widget.icon, 2, 2, 1, 1),
+			wibox.container.margin(s.clientcontrols.widget.title, 2, 2, 1, 1),
 			bar,
+			layout = wibox.layout.align.horizontal
+		},
+		{
 			{
 				s.clientcontrols.widget.floatingbutton,
 				s.clientcontrols.widget.maximizedbutton,
@@ -859,7 +887,7 @@ awful.screen.connect_for_each_screen(function(s)
 			spacing = 0,
 			layout = wibox.layout.fixed.horizontal
 		},
-		buttons = tasklist_buttons,
+		buttons = taskalt_buttons,
 		layout = wibox.layout.align.horizontal
 	}
 
@@ -884,24 +912,34 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 26, ontop = true, bg = "#000000AA", screen = s, visible = false })
+		s.mybotwibox = wibox({
+			screen = s,
+			x = 10,
+			y = 1000,
+			width = 1900,
+			height = 34,
+			type = "normal",
+			ontop = true,
+			bg = "#000000AA",
+			visible = false
+		})
 
 		s.mybotwibox:setup {
 			{ -- Left widgets
-				wrap_widget(keyboardwidget),
-				wrap_widget(volumewidget),
-				wrap_widget_light(wibox.widget.systray()),
+				wrap_widget_vmargin(wrap_widget(keyboardwidget)),
+				wrap_widget_vmargin(wrap_widget(volumewidget)),
+				wrap_widget_vmargin(wrap_widget_light(wibox.widget.systray())),
 				layout = wibox.layout.fixed.horizontal
 			},
 			{ -- Middle widgets
 				layout = wibox.layout.fixed.horizontal
 			},
 			{ -- Right widgets
-				wrap_widget(cpuwidget),
-				wrap_widget(memwidget),
-				wrap_widget(diowidget),
-				wrap_widget(datewidget),
-				wrap_widget(timewidget),
+				wrap_widget_vmargin(wrap_widget(cpuwidget)),
+				wrap_widget_vmargin(wrap_widget(memwidget)),
+				wrap_widget_vmargin(wrap_widget(diowidget)),
+				wrap_widget_vmargin(wrap_widget(datewidget)),
+				wrap_widget_vmargin(wrap_widget(timewidget)),
 				layout = wibox.layout.fixed.horizontal
 			},
 			layout = wibox.layout.align.horizontal
