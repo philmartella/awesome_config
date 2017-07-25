@@ -258,7 +258,7 @@ local function wrap_widget_trans (widget)
 end
 
 local function wrap_widget (widget)
-	local bg = beautiful.bg_normal
+	local bg = beautiful.bg_widget
 	return wrap_widget_margin(wibox.container.background(wrap_widget_margin(wrap_widget_hmargin(widget)), bg))
 end
 
@@ -354,7 +354,7 @@ kbdlayout = fleet.widget.keyboard_layout_control({
 
 kbdleds = fleet.widget.keyboard_key_control({
 	led_on = '#8AE181',
-	position = 'top_left',
+	position = 'bottom_left',
 	keys = {
 		{ name = ' 1 ', key = 'Num_Lock', led = 'Num Lock' },
 		{ name = ' A ', key = 'Caps_Lock', led = 'Caps Lock' }
@@ -370,16 +370,16 @@ kbdkeys = fleet.widget.keyboard_key_control({
 --]]
 
 keyboardwidget = wibox.widget {
---	{
---		image = beautiful.keyboard_icon,
---		widget = wibox.widget.imagebox,
---	},
---	bar,
---	kbdlayout.widget,
---	bar,
---	kbdleds.widget,
---	bar,
---	kbdkeys.widget,
+	{
+		image = beautiful.keyboard_icon,
+		widget = wibox.widget.imagebox,
+	},
+	bar,
+	kbdlayout.widget,
+	wrap_widget_hmargin(nil),
+	kbdleds.widget,
+	--bar,
+	--kbdkeys.widget,
 	layout = wibox.layout.fixed.horizontal
 }
 -- Volume control
@@ -387,10 +387,11 @@ volumecontrol = fleet.widget.volume_control({channel="Master"})
 
 volumewidget = wibox.widget {
 	{
-		image = beautiful.mpd_icon,
+		image = beautiful.speaker_icon,
 		widget = wibox.widget.imagebox,
 	},
-	wrap_widget_hmargin(nil),
+	bar,
+	--wrap_widget_hmargin(nil),
 	volumecontrol.widget,
 	layout = wibox.layout.fixed.horizontal
 }
@@ -688,7 +689,7 @@ awful.screen.connect_for_each_screen(function(s)
 	--s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons, {})
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, bg = "#000000AA", screen = s })
+	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, bg = "#000000CC", screen = s })
 
 	-- Client control
 	s.clientcontrols = fleet.widget.client_control(s, {
@@ -816,7 +817,7 @@ awful.screen.connect_for_each_screen(function(s)
 				end
 			end,
 			reset = function (w, c)
-				w:set_image(beautiful.application_icon)
+				w:set_image(beautiful.none_icon)
 			end
 		},
 	})
@@ -852,8 +853,6 @@ awful.screen.connect_for_each_screen(function(s)
 			wrap_widget_hmargin(nil),
 			wrap_widget_vmargin(mysesslauncher),
 			wrap_widget_vmargin(bar),
-			wrap_widget_vmargin(kbdleds.widget),
-			wrap_widget_vmargin(bar),
 			wrap_widget_margin(s.mytaglist),
 			wrap_widget_vmargin(bar),
 			wrap_widget_margin(s.mylayoutbox),
@@ -867,16 +866,12 @@ awful.screen.connect_for_each_screen(function(s)
 
 	if 1 == s.index then
 		-- Create the bottom wibox
-		s.mybotwibox = awful.wibar({ position = "bottom", height = 26, ontop = true, bg = "#000000AA", screen = s, visible = false })
+		s.mybotwibox = awful.wibar({ position = "bottom", height = 26, ontop = true, bg = "#000000CC", screen = s, visible = false })
 
 		s.mybotwibox:setup {
 			{ -- Left widgets
-			--	wrap_widget_trans(keyboardwidget),
-				wrap_widget_hmargin(nil),
-				wrap_widget_trans(kbdlayout.widget),
-				wrap_widget_vmargin(wrap_widget_vmargin(bar)),
-				wrap_widget_trans(volumewidget),
-				wrap_widget_vmargin(wrap_widget_vmargin(bar)),
+				wrap_widget(keyboardwidget),
+				wrap_widget(volumewidget),
 				wrap_widget_margin(wibox.widget.systray()),
 				layout = wibox.layout.fixed.horizontal
 			},
