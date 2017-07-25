@@ -823,8 +823,8 @@ awful.screen.connect_for_each_screen(function(s)
 	})
 
 	s.myclientcontrol = wibox.widget {
-		wrap_widget_hmargin(s.clientcontrols.widget.icon),
-		wrap_widget_hmargin(s.clientcontrols.widget.title),
+		wibox.container.margin(s.clientcontrols.widget.icon, 2, 2, 1, 1),
+		wibox.container.margin(s.clientcontrols.widget.title, 2, 2, 1, 1),
 		{
 			bar,
 			{
@@ -1370,15 +1370,15 @@ client.connect_signal("request::titlebars", function(c)
 		},
 		control = wibox.widget {
 			{
-				awful.titlebar.widget.floatingbutton(c),
-				awful.titlebar.widget.maximizedbutton(c),
-				awful.titlebar.widget.stickybutton(c),
-				awful.titlebar.widget.ontopbutton(c),
-				spacing = 8,
+				wrap_widget_margin(awful.titlebar.widget.floatingbutton(c)),
+				wrap_widget_margin(awful.titlebar.widget.maximizedbutton(c)),
+				wrap_widget_margin(awful.titlebar.widget.stickybutton(c)),
+				wrap_widget_margin(awful.titlebar.widget.ontopbutton(c)),
+				spacing = 0,
 				layout = wibox.layout.fixed.horizontal()
 			},
-			bar,
-			awful.titlebar.widget.closebutton(c),
+			wrap_widget_vmargin(bar),
+			wrap_widget_margin(awful.titlebar.widget.closebutton(c)),
 			layout = wibox.layout.fixed.horizontal()
 		},
 	}
