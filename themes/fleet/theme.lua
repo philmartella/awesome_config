@@ -1,4 +1,5 @@
 
+local gears = require("gears")
 local	icon_dir = os.getenv("HOME") .. "/.config/awesome/themes/fleet/icons/"
 local layout_icon_dir = icon_dir .. "layout/"
 local titlebar_icon_dir = icon_dir .. "titlebar/"
@@ -125,7 +126,7 @@ theme.tasklist_bg_image_normal              = nil
 theme.tasklist_bg_image_focus               = nil
 theme.tasklist_bg_image_urgent              = nil
 theme.tasklist_bg_image_minimize            = nil
-theme.tasklist_tasklist_disable_icon        = true
+theme.tasklist_disable_icon                 = nil
 theme.tasklist_plain_task_name              = true
 theme.tasklist_font                         = nil
 theme.tasklist_align                        = nil
@@ -134,7 +135,7 @@ theme.tasklist_font_minimized               = nil
 theme.tasklist_font_urgent                  = nil
 theme.tasklist_spacing                      = nil
 theme.tasklist_shape                        = nil
-theme.tasklist_shape_border_width           = nil
+theme.tasklist_shape_border_width           = 1
 theme.tasklist_shape_border_color           = nil
 theme.tasklist_shape_focus                  = nil
 theme.tasklist_shape_border_width_focus     = nil

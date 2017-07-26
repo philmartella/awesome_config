@@ -257,28 +257,10 @@ local function wrap_widget_trans (widget)
 	return wibox.container.margin(widget, 4, 4, 4, 4)
 end
 
-local function wrap_widget_light (w)
-	return  wrap_widget_margin(wibox.widget {
-		{
-			w,
-			left = 2,
-			right = 2,
-			top = 2,
-			bottom = 2,
-			widget = wibox.container.margin
-		},
-		shape = gears.shape.rectangle,
-		shape_border_color = "#777777",
-		shape_border_width = 1,
-		bg = beautiful.bg_widget,
-		widget = wibox.container.background
-	})
-end
-
 local function wrap_widget (w)
-	return  wrap_widget_margin(wibox.widget {
+	return wrap_widget_hmargin(wibox.widget {
 		{
-			wrap_widget_margin(wrap_widget_hmargin(w)),
+			wrap_widget_hmargin(w),
 			left = 2,
 			right = 2,
 			top = 2,
@@ -287,13 +269,12 @@ local function wrap_widget (w)
 		},
 		shape = gears.shape.rectangle,
 		shape_border_color = "#777777",
-		shape_border_width = 1,
+		shape_border_width = 0,
 		bg = beautiful.bg_widget,
 		widget = wibox.container.background
 	})
 	-- return wrap_widget_margin(wibox.container.background(wrap_widget_margin(wrap_widget_hmargin(widget)), bg))
 end
-
 -- }}}
 
 -- {{{ Menu
@@ -315,9 +296,7 @@ mysessmenu = {
 }
 
 mywmmenu = {
-	{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox, awful.screen.focused().mybotwibox}) end },
-	{ "toggle top wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
-	{ "toggle bottom wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mybotwibox}) end },
+	{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
 	{ "change wallpaper", "nitrogen" },
 	{ "lock screen", lockscreen_cmd },
 }
@@ -386,7 +365,7 @@ kbdlayout = fleet.widget.keyboard_layout_control({
 
 kbdleds = fleet.widget.keyboard_key_control({
 	led_on = '#8AE181',
-	position = 'bottom_left',
+	position = 'top_right',
 	keys = {
 		{ name = ' 1 ', key = 'Num_Lock', led = 'Num Lock' },
 		{ name = ' A ', key = 'Caps_Lock', led = 'Caps Lock' }
@@ -647,6 +626,20 @@ vicious.register(diowidget, vicious.widgets.dio, function (widget, args)
 	return
 end, 1)
 
+-- Combo Widget
+combwidget = wibox.widget {
+	wibox.widget.systray(),
+	wrap_widget(volumewidget),
+	wrap_widget(keyboardwidget),
+	wrap_widget(cpuwidget),
+	wrap_widget(memwidget),
+	wrap_widget(diowidget),
+	wrap_widget(datewidget),
+	wrap_widget(timewidget),
+	visible = false,
+	layout = wibox.layout.fixed.horizontal
+}
+
 -- Taglist
 local taglist_buttons = awful.util.table.join(
 	awful.button({ }, 1, function(t) t:view_only() end),
@@ -721,10 +714,10 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Create a tasklist widget
 	s.mytasklist = awful.widget.tasklist(s, fleet.widget.client_control.filter.currenttagsnotfocused, tasklist_buttons, {
 		disable_task_name = true
-	})
+	}, fleet.common.list_update)
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", height = 22, ontop = true, bg = "#000000AA", screen = s })
+	s.mywibox = awful.wibar({ position = "top", height = 26, ontop = true, bg = "#000000AA", screen = s })
 
 	-- Client control
 	s.clientcontrols = fleet.widget.client_control(s, {
@@ -863,7 +856,7 @@ awful.screen.connect_for_each_screen(function(s)
 		{
 			nil,
 			wibox.container.margin(s.mytasklist, 2, 2, 1, 1),
-			nil,
+			bar,
 			layout = wibox.layout.align.horizontal
 		},
 		{
@@ -893,58 +886,69 @@ awful.screen.connect_for_each_screen(function(s)
 
 	-- Add widgets to the wibox
 	s.mywibox:setup {
-		{ -- Left widgets
-			wrap_widget_hmargin(nil),
-			wrap_widget_vmargin(mylauncher),
-			wrap_widget_hmargin(nil),
-			wrap_widget_vmargin(mysesslauncher),
-			wrap_widget_vmargin(bar),
-			wrap_widget_margin(s.mytaglist),
-			wrap_widget_vmargin(bar),
-			wrap_widget_margin(s.mylayoutbox),
-			wrap_widget_margin(s.mypromptbox),
-			layout = wibox.layout.fixed.horizontal
-		},
-		nil,
-		wrap_widget_vmargin(s.myclientcontrol),
-		layout = wibox.layout.align.horizontal
-	}
-
-	if 1 == s.index then
-		-- Create the bottom wibox
-		s.mybotwibox = wibox({
-			screen = s,
-			x = 10,
-			y = 1000,
-			width = 1900,
-			height = 34,
-			type = "normal",
-			ontop = true,
-			bg = "#000000AA",
-			visible = false
-		})
-
-		s.mybotwibox:setup {
+		{
 			{ -- Left widgets
-				wrap_widget_vmargin(wrap_widget(keyboardwidget)),
-				wrap_widget_vmargin(wrap_widget(volumewidget)),
-				wrap_widget_vmargin(wrap_widget_light(wibox.widget.systray())),
+				wrap_widget_hmargin(nil),
+				wrap_widget_vmargin(mylauncher),
+				wrap_widget_hmargin(nil),
+				wrap_widget_vmargin(mysesslauncher),
+				wrap_widget_vmargin(bar),
+				wrap_widget_margin(s.mytaglist),
+				wrap_widget_vmargin(bar),
+				wrap_widget_margin(s.mylayoutbox),
+				wrap_widget_margin(s.mypromptbox),
 				layout = wibox.layout.fixed.horizontal
 			},
-			{ -- Middle widgets
-				layout = wibox.layout.fixed.horizontal
-			},
-			{ -- Right widgets
-				wrap_widget_vmargin(wrap_widget(cpuwidget)),
-				wrap_widget_vmargin(wrap_widget(memwidget)),
-				wrap_widget_vmargin(wrap_widget(diowidget)),
-				wrap_widget_vmargin(wrap_widget(datewidget)),
-				wrap_widget_vmargin(wrap_widget(timewidget)),
+			nil,
+			{
+				combwidget,
+				wrap_widget_vmargin(s.myclientcontrol),
 				layout = wibox.layout.fixed.horizontal
 			},
 			layout = wibox.layout.align.horizontal
-		}
-	end
+		},
+		left = 2,
+		right = 2,
+		top = 2,
+		bottom = 2,
+		widget = wibox.container.margin
+	}
+
+	--if 1 == s.index then
+		-- Create the bottom wibox
+		--s.mybotwibox = wibox({
+		--	screen = s,
+		--	x = 10,
+		--	y = 0,
+		--	width = 1024,
+		--	height = 34,
+		--	type = "normal",
+		--	ontop = true,
+		--	bg = "#000000AA",
+		--	visible = false
+		--})
+
+		--s.mybotwibox:setup {
+		--	{ -- Left widgets
+		--		wrap_widget_vmargin(wrap_widget(keyboardwidget)),
+		--		wrap_widget_vmargin(wrap_widget(volumewidget)),
+		--		wrap_widget_vmargin(wrap_widget(wibox.widget.systray())),
+		--		layout = wibox.layout.fixed.horizontal
+		--	},
+		--	{ -- Middle widgets
+		--		layout = wibox.layout.fixed.horizontal
+		--	},
+		--	{ -- Right widgets
+		--		wrap_widget_vmargin(wrap_widget(cpuwidget)),
+		--		wrap_widget_vmargin(wrap_widget(memwidget)),
+		--		wrap_widget_vmargin(wrap_widget(diowidget)),
+		--		wrap_widget_vmargin(wrap_widget(datewidget)),
+		--		wrap_widget_vmargin(wrap_widget(timewidget)),
+		--		layout = wibox.layout.fixed.horizontal
+		--	},
+		--	layout = wibox.layout.align.horizontal
+		--}
+	--end
 end)
 -- }}}
 
@@ -1098,9 +1102,12 @@ globalkeys = awful.util.table.join(
 	end,
 	{description = "lua execute prompt", group = "awesome"}),
 
-	awful.key({ modkey }, "b", function () fleet.layout.toggle_wibox({
-		awful.screen.focused().mybotwibox
-	}) end,
+	awful.key({ modkey }, "b", function ()
+		local vis = combwidget.visible
+
+		combwidget.visible = not vis
+		awful.screen.focused().myclientcontrol.visible = vis
+	end,
 	{description = "hide the wibars", group = "layout"}),
 
 	-- Help window
