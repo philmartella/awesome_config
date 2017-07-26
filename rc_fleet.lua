@@ -86,6 +86,7 @@ naughty.config.presets.critical.border_color = "#FFFFFF"
 -- }}}
 
 -- {{{ Helper functions
+local swappable = setmetatable({}, { __mode = "k" })
 _awesome_quit = awesome.quit
 _awesome_restart = awesome.restart
 
@@ -241,8 +242,44 @@ local function adjust_client_border (c)
 	end
 end
 
-local function wrap_widget_margin (widget)
-	return wibox.container.margin(widget, 2, 2, 2, 2)
+local function swappable_widget (s, fw, sw)
+	local swaps = swappable[s]
+
+	if not swaps then
+		swaps = setmetatable({}, { __mode = "v" })
+		swappable[s] = swaps
+	end
+
+	local w = wibox.widget {
+		fw,
+		widget = wibox.container.margin
+	}
+
+	w._swappable = {position = "a", widgets = {a = fw, b = sw}}
+
+	table.insert(swaps, w)
+
+	return w
+end
+
+local function swap_swappable (s, pos)
+	if not s or not swappable[s] then return end
+	if pos ~= "a" and pos ~= "b" then pos = nil end
+
+	local swaps = swappable[s]
+
+	for _, w in pairs(swaps) do
+		if not pos then
+			if w._swappable.position == "a" then
+				pos = "b"
+			else
+				pos = "a"
+			end
+		end
+
+		w._swappable.position = pos
+		w.widget = w._swappable.widgets[pos]
+	end
 end
 
 local function wrap_widget_vmargin (widget)
@@ -253,16 +290,16 @@ local function wrap_widget_hmargin (widget)
 	return wibox.container.margin(widget, 2, 2, 0, 0)
 end
 
-local function wrap_widget_trans (widget)
-	return wibox.container.margin(widget, 4, 4, 4, 4)
+local function wrap_widget_margin (widget)
+	return wrap_widget_hmargin(wrap_widget_vmargin(widget))
 end
 
 local function wrap_widget (w)
 	return wrap_widget_hmargin(wibox.widget {
 		{
-			wrap_widget_hmargin(w),
-			left = 2,
-			right = 2,
+			w,
+			left = 4,
+			right = 4,
 			top = 2,
 			bottom = 2,
 			widget = wibox.container.margin
@@ -273,7 +310,6 @@ local function wrap_widget (w)
 		bg = beautiful.bg_widget,
 		widget = wibox.container.background
 	})
-	-- return wrap_widget_margin(wibox.container.background(wrap_widget_margin(wrap_widget_hmargin(widget)), bg))
 end
 -- }}}
 
@@ -628,7 +664,7 @@ end, 1)
 
 -- Combo Widget
 combwidget = wibox.widget {
-	wibox.widget.systray(),
+	wrap_widget_hmargin(wibox.widget.systray()),
 	wrap_widget(volumewidget),
 	wrap_widget(keyboardwidget),
 	wrap_widget(cpuwidget),
@@ -636,7 +672,6 @@ combwidget = wibox.widget {
 	wrap_widget(diowidget),
 	wrap_widget(datewidget),
 	wrap_widget(timewidget),
-	visible = false,
 	layout = wibox.layout.fixed.horizontal
 }
 
@@ -853,30 +888,24 @@ awful.screen.connect_for_each_screen(function(s)
 	})
 
 	s.myclientcontrol = wibox.widget {
+		wrap_widget_hmargin(nil),
 		{
-			nil,
-			wibox.container.margin(s.mytasklist, 2, 8, 1, 1),
-			nil,
-			layout = wibox.layout.align.horizontal
-		},
-		{
-			wibox.container.margin(s.clientcontrols.widget.icon, 2, 2, 1, 1),
-			wibox.container.margin(s.clientcontrols.widget.title, 2, 2, 1, 1),
-			bar,
+			wrap_widget_hmargin(s.clientcontrols.widget.icon),
+			wrap_widget_hmargin(s.clientcontrols.widget.title),
+			wrap_widget_vmargin(bar),
 			layout = wibox.layout.align.horizontal
 		},
 		{
 			{
-				s.clientcontrols.widget.floatingbutton,
-				s.clientcontrols.widget.maximizedbutton,
-				s.clientcontrols.widget.stickybutton,
-				s.clientcontrols.widget.ontopbutton,
-				spacing = 4,
+				wrap_widget_margin(s.clientcontrols.widget.floatingbutton),
+				wrap_widget_margin(s.clientcontrols.widget.maximizedbutton),
+				wrap_widget_margin(s.clientcontrols.widget.stickybutton),
+				wrap_widget_margin(s.clientcontrols.widget.ontopbutton),
+				spacing = 0,
 				layout = wibox.layout.fixed.horizontal
 			},
-			bar,
-			s.clientcontrols.widget.closebutton,
-			wrap_widget_hmargin(nil),
+			wrap_widget_vmargin(bar),
+			wrap_widget_vmargin(s.clientcontrols.widget.closebutton),
 			spacing = 0,
 			layout = wibox.layout.fixed.horizontal
 		},
@@ -888,23 +917,21 @@ awful.screen.connect_for_each_screen(function(s)
 	s.mywibox:setup {
 		{
 			{ -- Left widgets
-				wrap_widget_hmargin(nil),
-				wrap_widget_vmargin(mylauncher),
-				wrap_widget_hmargin(nil),
-				wrap_widget_vmargin(mysesslauncher),
+				wrap_widget_hmargin(mylauncher),
+				wrap_widget_hmargin(mysesslauncher),
 				wrap_widget_vmargin(bar),
-				wrap_widget_margin(s.mytaglist),
+				wrap_widget_vmargin(s.mytaglist),
 				wrap_widget_vmargin(bar),
 				wrap_widget_margin(s.mylayoutbox),
-				wrap_widget_margin(s.mypromptbox),
 				layout = wibox.layout.fixed.horizontal
 			},
-			nil,
 			{
-				combwidget,
-				wrap_widget_vmargin(s.myclientcontrol),
-				layout = wibox.layout.fixed.horizontal
+				wrap_widget_margin(s.mypromptbox),
+				nil,
+				wrap_widget_hmargin(s.mytasklist),
+				layout = wibox.layout.align.horizontal
 			},
+			swappable_widget(s, s.myclientcontrol, combwidget),
 			layout = wibox.layout.align.horizontal
 		},
 		left = 2,
@@ -1103,10 +1130,13 @@ globalkeys = awful.util.table.join(
 	{description = "lua execute prompt", group = "awesome"}),
 
 	awful.key({ modkey }, "b", function ()
-		local vis = combwidget.visible
-
-		combwidget.visible = not vis
-		awful.screen.focused().myclientcontrol.visible = vis
+		awful.screen.connect_for_each_screen(function(s)
+			if awful.screen.focused() == s then
+				swap_swappable(s)
+			else
+				swap_swappable(s, "a")
+			end
+		end)
 	end,
 	{description = "hide the wibars", group = "layout"}),
 

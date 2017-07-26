@@ -107,7 +107,7 @@ function common.list_update(w, buttons, label, data, objects)
         bgb.shape_border_color = args.shape_border_color
 
         w:add(bgb)
-      w:set_max_widget_size(22)
+      w:set_max_widget_size(32)
     end
 end
 
