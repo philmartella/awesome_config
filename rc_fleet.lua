@@ -855,8 +855,8 @@ awful.screen.connect_for_each_screen(function(s)
 	s.myclientcontrol = wibox.widget {
 		{
 			nil,
-			wibox.container.margin(s.mytasklist, 2, 2, 1, 1),
-			bar,
+			wibox.container.margin(s.mytasklist, 2, 8, 1, 1),
+			nil,
 			layout = wibox.layout.align.horizontal
 		},
 		{
