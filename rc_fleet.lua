@@ -187,9 +187,10 @@ local function rename_tag ()
 
 			if t then
 				if not new_name or #new_name == 0 then
+					--t.icon_only = true
 					t.name = t.index
-					t.icon = nil
 				else
+					t.icon_only = false
 					t.name = new_name
 					t.icon = beautiful.tag_icon[t.index] or nil
 				end
@@ -730,6 +731,12 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Each screen has its own tag table.
 	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 
+	-- Icon each tag
+	-- for _, t in pairs(s.tags) do
+	-- 	t.icon_only = true
+	-- 	t.icon = beautiful.tag_icon[t.index] or nil
+	-- end
+
 	-- Create a promptbox for each screen
 	s.mypromptbox = awful.widget.prompt()
 
@@ -752,7 +759,7 @@ awful.screen.connect_for_each_screen(function(s)
 	}, fleet.common.list_update)
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", height = 26, ontop = true, bg = "#000000AA", screen = s })
+	s.mywibox = awful.wibar({ position = "top", height = 28, ontop = true, bg = "#000000AA", screen = s })
 
 	-- Client control
 	s.clientcontrols = fleet.widget.client_control(s, {
@@ -897,15 +904,15 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 		{
 			{
-				wrap_widget_margin(s.clientcontrols.widget.floatingbutton),
-				wrap_widget_margin(s.clientcontrols.widget.maximizedbutton),
-				wrap_widget_margin(s.clientcontrols.widget.stickybutton),
-				wrap_widget_margin(s.clientcontrols.widget.ontopbutton),
-				spacing = 0,
+				s.clientcontrols.widget.floatingbutton,
+				s.clientcontrols.widget.maximizedbutton,
+				s.clientcontrols.widget.stickybutton,
+				s.clientcontrols.widget.ontopbutton,
+				spacing = 4,
 				layout = wibox.layout.fixed.horizontal
 			},
 			wrap_widget_vmargin(bar),
-			wrap_widget_vmargin(s.clientcontrols.widget.closebutton),
+			s.clientcontrols.widget.closebutton,
 			spacing = 0,
 			layout = wibox.layout.fixed.horizontal
 		},
@@ -920,9 +927,9 @@ awful.screen.connect_for_each_screen(function(s)
 				wrap_widget_hmargin(mylauncher),
 				wrap_widget_hmargin(mysesslauncher),
 				wrap_widget_vmargin(bar),
-				wrap_widget_vmargin(s.mytaglist),
+				wrap_widget_hmargin(s.mytaglist),
 				wrap_widget_vmargin(bar),
-				wrap_widget_margin(s.mylayoutbox),
+				wrap_widget_hmargin(s.mylayoutbox),
 				layout = wibox.layout.fixed.horizontal
 			},
 			{
@@ -937,7 +944,7 @@ awful.screen.connect_for_each_screen(function(s)
 		left = 2,
 		right = 2,
 		top = 2,
-		bottom = 2,
+		bottom = 4,
 		widget = wibox.container.margin
 	}
 
@@ -1463,15 +1470,15 @@ client.connect_signal("request::titlebars", function(c)
 		},
 		control = wibox.widget {
 			{
-				wrap_widget_vmargin(awful.titlebar.widget.floatingbutton(c)),
-				wrap_widget_vmargin(awful.titlebar.widget.maximizedbutton(c)),
-				wrap_widget_vmargin(awful.titlebar.widget.stickybutton(c)),
-				wrap_widget_vmargin(awful.titlebar.widget.ontopbutton(c)),
+				awful.titlebar.widget.floatingbutton(c),
+				awful.titlebar.widget.maximizedbutton(c),
+				awful.titlebar.widget.stickybutton(c),
+				awful.titlebar.widget.ontopbutton(c),
 				spacing = 4,
 				layout = wibox.layout.fixed.horizontal()
 			},
 			wrap_widget_vmargin(bar),
-			wrap_widget_vmargin(awful.titlebar.widget.closebutton(c)),
+			awful.titlebar.widget.closebutton(c),
 			layout = wibox.layout.fixed.horizontal()
 		},
 	}
