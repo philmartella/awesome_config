@@ -323,6 +323,8 @@ myawesomemenu = {
 }
 
 mysysmenu = {
+	{ "suspend", "systemctl suspend"},
+	{ "hibernate", "systemctl hibernate"},
 	{ "reboot", "systemctl reboot"},
 	{ "poweroff", "systemctl poweroff"}
 }
@@ -333,6 +335,15 @@ mysessmenu = {
 }
 
 mywmmenu = {
+	{ "toggle swap", function ()
+		awful.screen.connect_for_each_screen(function(s)
+			if awful.screen.focused() == s then
+				swap_swappable(s)
+			else
+				swap_swappable(s, "a")
+			end
+		end)
+ end },
 	{ "toggle wibox", function () fleet.layout.toggle_wibox({awful.screen.focused().mywibox}) end },
 	{ "change wallpaper", "nitrogen" },
 	{ "lock screen", lockscreen_cmd },
