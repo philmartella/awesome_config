@@ -234,12 +234,20 @@ local function set_wallpaper(s)
 end
 
 local function adjust_client_border (c)
-	if c.maximized == true then
+	if c.maximized == true or (c.maximized_horizontal == true and c.maximized_vertical == true) then
 		c.border_width = 0
-	elseif c.maximized_horizontal == true and c.maximized_vertical == true then
-		c.border_width = 0
+
+		-- c.shape = function (cr, w, h)
+		--	gears.shape.rectangle(cr, w, h)
+		-- end
 	else
 		c.border_width = beautiful.border_width
+
+		-- c.shape = function (cr, w, h)
+			-- gears.shape.rectangle(cr, w, h)
+			-- gears.shape.rounded_rect(cr, w, h, 5)
+			-- gears.shape.octogon(cr, w, h, 10)
+		-- end
 	end
 end
 
@@ -1449,7 +1457,6 @@ client.connect_signal("manage", function (c)
 		-- Prevent clients from being unreachable after screen count changes.
 		awful.placement.no_offscreen(c)
 	end
-
 end)
 
 -- Add a titlebar if titlebars_enabled is set to true in the rules.
