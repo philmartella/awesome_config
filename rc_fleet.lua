@@ -1362,9 +1362,6 @@ awful.rules.rules = {
 
 	-- Floating and Centered clients.
 	{ rule_any = {
-			type = {
-				"dialog",
-			},
 			instance = {
 				"gnome",
 				"eog",
@@ -1373,7 +1370,6 @@ awful.rules.rules = {
 				"copyq", -- Includes session name in class.
 			},
 			class = {
-				"Arandr",
 				"Kruler",
 				"MessageWin", -- kalarm.
 				"pinentry",
@@ -1398,6 +1394,7 @@ awful.rules.rules = {
 			instance = {
 				"nitrogen",
 				"pavucontrol",
+				"zoom",
 			},
 			class = {
 				"Arandr",
@@ -1413,16 +1410,20 @@ awful.rules.rules = {
 
 	-- Floating centered titlebar clients
 	{ rule_any = {
+			type = {
+				"dialog",
+			},
 			instance = {
 				"seahorse",
 				"DTA", -- Firefox addon DownThemAll.
+				"Devtools",-- Firefox Devtools Window.
 			},
 			class = {
 				"Gpick",
 				"Sxiv",
 				"Wpa_gui",
 				"MPlayer",
-				"vdpau"
+				"vdpau",
 			},
 			name = {
 				"Blender User Preferences",
