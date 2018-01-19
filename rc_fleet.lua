@@ -365,6 +365,28 @@ myssmenu = awful.menu({
 	}
 })
 
+-- Generated Menus
+function gen_monmenu ()
+	local monmenuitems = {
+		{"night mode", terminal}
+	}
+
+	awful.screen.connect_for_each_screen(function (s)
+		monmenuitems[#monmenuitems+1] = { "Monitor "..s.index, awful.menu({
+			items = {
+				{"rotate left", terminal},
+				{"rotate right", terminal}
+			}
+		})}
+	end)
+
+	return monmenuitems
+end
+
+mymonitormenu = awful.menu({
+	items = gen_monmenu()
+});
+
 mymainmenu = awful.menu({
 	items = {
 		{ "awesome", myawesomemenu },
@@ -375,18 +397,6 @@ mymainmenu = awful.menu({
 		{ "take screenshot", screenshot }
 	}
 })
-
--- Generated Menus
-mymonitormenu = awful.menu({});
-awful.screen.connect_for_each_screen(function(s)
-	mymonitormenu.add(awful.menu({
-		title = "screen " .. s.index,
-		items = {
-			{ "rotate right", function () end },
-			{ "rotate left", function () end }
-		}
-	}))
-end)
 
 myrootmenu = awful.menu({
 	items = mywmmenu
