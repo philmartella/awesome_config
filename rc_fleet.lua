@@ -1362,6 +1362,9 @@ awful.rules.rules = {
 
 	-- Floating and Centered clients.
 	{ rule_any = {
+			type = {
+				"dialog",
+			},
 			instance = {
 				"gnome",
 				"eog",
@@ -1410,9 +1413,6 @@ awful.rules.rules = {
 
 	-- Floating centered titlebar clients
 	{ rule_any = {
-			type = {
-				"dialog",
-			},
 			instance = {
 				"seahorse",
 				"DTA", -- Firefox addon DownThemAll.
