@@ -357,54 +357,21 @@ mywmmenu = {
 	{ "lock screen", lockscreen_cmd },
 }
 
-myssmenu = awful.menu({
+mymainmenu = awful.menu({
 	items = {
 		{ "session", mysessmenu },
 		{ "system", mysysmenu },
-		{ "lock screen", lockscreen_cmd }
-	}
-})
-
--- Generated Menus
-function gen_monmenu ()
-	local monmenuitems = {
-		{"night mode", terminal}
-	}
-
-	awful.screen.connect_for_each_screen(function (s)
-		monmenuitems[#monmenuitems+1] = { "Monitor "..s.index, awful.menu({
-			items = {
-				{"rotate left", terminal},
-				{"rotate right", terminal}
-			}
-		})}
-	end)
-
-	return monmenuitems
-end
-
-mymonitormenu = awful.menu({
-	items = gen_monmenu()
-});
-
-mymainmenu = awful.menu({
-	items = {
 		{ "awesome", myawesomemenu },
-		{ "desktop", mywmmenu },
-		{ "monitor", mymonitormenu },
 	--	{ "awesome", myawesomemenu, beautiful.awesome_icon },
+		{ "desktop", mywmmenu },
 		{ "open terminal", terminal },
-		{ "take screenshot", screenshot }
+		{ "take screenshot", screenshot },
+		{ "lock screen", lockscreen_cmd },
 	}
 })
 
 myrootmenu = awful.menu({
 	items = mywmmenu
-})
-
-mysesslauncher = awful.widget.launcher({
-	image = beautiful.session_icon,
-	menu = myssmenu
 })
 
 mylauncher = awful.widget.launcher({
@@ -954,7 +921,7 @@ awful.screen.connect_for_each_screen(function(s)
 		{
 			{ -- Left widgets
 				wrap_widget_hmargin(mylauncher),
-				wrap_widget_hmargin(mysesslauncher),
+				--wrap_widget_hmargin(mysesslauncher),
 				wrap_widget_vmargin(bar),
 				wrap_widget_hmargin(s.mytaglist),
 				wrap_widget_vmargin(bar),
