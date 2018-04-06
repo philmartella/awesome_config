@@ -150,13 +150,13 @@ theme.tasklist_shape_border_color_urgent    = nil
 
 --{{{ titlebar
 theme.titlebar_fg_normal                         = "#777777"
-theme.titlebar_bg_normal                         = "#31393E"
+theme.titlebar_bg_normal                         = "#222D32"
 theme.titlebar_bgimage_normal                    = nil
 theme.titlebar_fg                                = "#FFFFFF"
 theme.titlebar_bg                                = "#31393E"
 theme.titlebar_bgimage                           = nil
 theme.titlebar_fg_focus                          = "#FFFFFF"
-theme.titlebar_bg_focus                          = "#31393E"
+theme.titlebar_bg_focus                          = "#222D32"
 theme.titlebar_bgimage_focus                     = nil
 theme.titlebar_floating_button_normal            = titlebar_icon_dir .. "floating_normal_inactive.xpm"
 theme.titlebar_maximized_button_normal           = titlebar_icon_dir .. "maximized_normal_inactive.xpm"

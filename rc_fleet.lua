@@ -234,20 +234,20 @@ local function set_wallpaper(s)
 end
 
 local function adjust_client_border (c)
-	if c.maximized == true or (c.maximized_horizontal == true and c.maximized_vertical == true) then
+	if c.fullscreen or c.maximized == true or (c.maximized_horizontal == true and c.maximized_vertical == true) then
 		c.border_width = 0
 
-		-- c.shape = function (cr, w, h)
-		--	gears.shape.rectangle(cr, w, h)
-		-- end
+	--	c.shape = function (cr, w, h)
+	--	 gears.shape.rectangle(cr, w, h)
+	--	end
 	else
 		c.border_width = beautiful.border_width
 
-		-- c.shape = function (cr, w, h)
+	--	c.shape = function (cr, w, h)
 			-- gears.shape.rectangle(cr, w, h)
 			-- gears.shape.rounded_rect(cr, w, h, 5)
-			-- gears.shape.octogon(cr, w, h, 10)
-		-- end
+			-- gears.shape.octogon(cr, w, h, 40)
+	--	end
 	end
 end
 
@@ -1314,6 +1314,18 @@ awful.rules.rules = {
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen,
 			titlebars_enabled = false
 		}
+	},
+
+	-- No Border clients
+	{ rule_any = {
+			class = {
+				"Plank",
+			}
+		},
+		properties = {
+			border_width = 0,
+			border_color = 'transparent',
+		},
 	},
 
 	-- No size hints clients
